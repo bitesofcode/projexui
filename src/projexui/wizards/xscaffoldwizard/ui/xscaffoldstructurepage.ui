@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>XScaffoldStructurePage</class>
+ <widget class="QWizardPage" name="XScaffoldStructurePage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>WizardPage</string>
+  </property>
+  <property name="title">
+   <string>Structure</string>
+  </property>
+  <property name="subTitle">
+   <string>Setup filesystem structure before creation</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="XFilepathEdit" name="uiOutputPATH">
+     <property name="x_filepathModeText" stdset="0">
+      <string>Path</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="XTreeWidget" name="uiStructureTREE">
+     <property name="x_arrowStyle" stdset="0">
+      <bool>true</bool>
+     </property>
+     <property name="x_hint" stdset="0">
+      <string>No structure defined.</string>
+     </property>
+     <property name="x_showGrid" stdset="0">
+      <bool>false</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>Structure</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XFilepathEdit</class>
+   <extends>QWidget</extends>
+   <header>projexui.widgets.xfilepathedit</header>
+  </customwidget>
+  <customwidget>
+   <class>XTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>projexui.widgets.xtreewidget</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

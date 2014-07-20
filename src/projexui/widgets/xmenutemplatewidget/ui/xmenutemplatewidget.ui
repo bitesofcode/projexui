@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>566</width>
+    <height>313</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Edit Menu</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="XLineEdit" name="XLineEdit">
+         <property name="x_hint" stdset="0">
+          <string>filter actions...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="XTreeWidget" name="uiActionTREE">
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragOnly</enum>
+         </property>
+         <property name="rootIsDecorated">
+          <bool>false</bool>
+         </property>
+         <property name="x_arrowStyle" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="x_showGrid" stdset="0">
+          <bool>false</bool>
+         </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Actions</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="XTreeWidget" name="uiMenuTREE">
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::InternalMove</enum>
+      </property>
+      <property name="x_arrowStyle" stdset="0">
+       <bool>true</bool>
+      </property>
+      <property name="x_showGrid" stdset="0">
+       <bool>false</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Menu</string>
+       </property>
+      </column>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>projexui.widgets.xlineedit</header>
+  </customwidget>
+  <customwidget>
+   <class>XTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>projexui.widgets.xtreewidget</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>XLineEdit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>uiActionTREE</receiver>
+   <slot>filterItems(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>108</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>110</x>
+     <y>68</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

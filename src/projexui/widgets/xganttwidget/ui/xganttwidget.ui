@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>XGanttWidget</class>
+ <widget class="QWidget" name="XGanttWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>733</width>
+    <height>462</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="XSplitter" name="uiGanttSPLT">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="XTreeWidget" name="uiGanttTREE">
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectItems</enum>
+      </property>
+      <property name="x_arrowStyle" stdset="0">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string notr="true">Name</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Date Start</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Date End</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Days</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Weekdays</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QGraphicsView" name="uiGanttVIEW">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="viewportUpdateMode">
+       <enum>QGraphicsView::FullViewportUpdate</enum>
+      </property>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XSplitter</class>
+   <extends>QSplitter</extends>
+   <header>projexui.widgets.xsplitter</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>XTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>projexui.widgets.xtreewidget</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>XLogRecordWidget</class>
+ <widget class="QWidget" name="XLogRecordWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>546</width>
+    <height>386</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Log Record Widget</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="XToolButton" name="uiRecordBTN">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle Active Listening&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../../../../resources/projexui_default.qrc">
+       <normaloff>:/default/img/debug/break.png</normaloff>:/default/img/debug/break.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="x_shadowed" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="XSearchEdit" name="uiFilterTXT">
+     <property name="x_hint" stdset="0">
+      <string>filter records</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="XPopupButton" name="uiSettingsBTN">
+     <property name="icon">
+      <iconset resource="../../../../../resources/projexui_default.qrc">
+       <normaloff>:/default/img/config.png</normaloff>:/default/img/config.png</iconset>
+     </property>
+     <property name="x_shadowed" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="XTreeWidget" name="uiRecordTREE">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectItems</enum>
+     </property>
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+     <property name="x_hint" stdset="0">
+      <string>No logging records have been found.  To setup logging, you can use the config panel on the top right button.</string>
+     </property>
+     <property name="x_showGrid" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="x_showGridColumns" stdset="0">
+      <bool>false</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>Level</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Level #</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Created at</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Message</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Relative time (secs)</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Filename</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Module</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Function</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Line #</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Path</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Process ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Process Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Thread</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Thread Name</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QLabel" name="uiFeedbackLBL">
+     <property name="text">
+      <string>Main thread: &lt;none&gt;</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>projexui.widgets.xlineedit</header>
+  </customwidget>
+  <customwidget>
+   <class>XPopupButton</class>
+   <extends>XToolButton</extends>
+   <header>projexui.widgets.xpopupbutton</header>
+  </customwidget>
+  <customwidget>
+   <class>XSearchEdit</class>
+   <extends>XLineEdit</extends>
+   <header>projexui.widgets.xsearchedit</header>
+  </customwidget>
+  <customwidget>
+   <class>XToolButton</class>
+   <extends>QToolButton</extends>
+   <header>projexui.widgets.xtoolbutton</header>
+  </customwidget>
+  <customwidget>
+   <class>XTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>projexui.widgets.xtreewidget</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../../../resources/projexui_default.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>uiFilterTXT</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>uiRecordTREE</receiver>
+   <slot>filterItems(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>170</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>177</x>
+     <y>92</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,35 @@
+# YAML builder definition
+type: PackageBuilder
+
+# define the python location
+package:
+    name: projexui
+    path: ./src
+
+# define global settings
+settings:
+    company: Projex Software
+    companyUrl: http://www.projexsoftware.com
+
+# define the path options
+paths:
+    buildPath: ./.build/{platform}
+    distributionPath: ./.dist/{platform}
+    outputPath: ./bin
+    hookPaths: ./hooks
+    installPath: C:/Program Files (x86)/Projex
+
+# define the executable options
+executable:
+    runtime: ./src/projexui/scripts/xdk.py
+    exe: xdk_browser
+    product: XDK Browser
+    options:
+        upx: False
+        logo: ./resources/projexui/apps/xdk.ico
+
+# define installer options
+installer:
+    name: xdk-browser-{version}
+    logo: ./resources/projexui/apps/xdk.ico
+
