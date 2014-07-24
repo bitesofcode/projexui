@@ -1,2 +1,6 @@
 *.pyc
 *.pyo
+/src/build
+/src/dist
+/src/projexui.egg-info
+/.build
