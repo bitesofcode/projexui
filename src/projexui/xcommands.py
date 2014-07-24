@@ -107,6 +107,10 @@ def buildResourceFile(rscpath, outpath=''):
             logger.error(msg.format(exe))
             return False
     
+    # make sure we actually generated a file
+    if not os.path.exists(outpath):
+        return False
+    
     # map the output back to PySide if necessary
     if QT_WRAPPER == 'PySide' and used_pyqt:
         # clean up resource file

@@ -397,6 +397,19 @@ class XTreeWidget(QtGui.QTreeWidget):
                     output += self.checkedItems(column, item, recurse)
         return output
     
+    def clear(self):
+        """
+        Removes all the items from this tree widget.  This will go through
+        and also destroy any XTreeWidgetItems prior to the model clearing
+        its references.
+        """
+        # go through and properly destroy all the items for this tree
+        for item in self.traverseItems():
+            if isinstance(item, XTreeWidgetItem):
+                item.destroy()
+        
+        super(XTreeWidget, self).clear()
+    
     def collectFilterTerms( self, columns = None, ignore = None ):
         """
         Returns a collection of filter terms for this tree widget based on \

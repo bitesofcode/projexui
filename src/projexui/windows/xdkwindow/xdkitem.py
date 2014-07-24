@@ -156,6 +156,9 @@ class XdkEntryItem(XTreeWidgetItem):
             XdkEntryItem(self, filepath, folder=folder)
     
     def loadFromXml(self, xml, basepath):
+        if not basepath:
+            return
+        
         filepath = os.path.join(basepath, xml.get('url', ''))
         filepath = filepath.replace('\\', '/')
         title = xml.get('title').split('.')[-1]

@@ -87,6 +87,8 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         
         tree = self.treeWidget()
         if tree:
+            tree.destroyed.connect(self.destroy)
+            
             try:
                 height = tree.defaultItemHeight()
             except:
@@ -122,9 +124,26 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         height = doc.documentLayout().documentSize().height()
         self.setFixedHeight(height+2)
     
-    def cleanup(self):
-        for movie in self._movies.values():
-            movie.frameChanged.disconnect(self._updateFrame)
+    def destroy(self):
+        """
+        Destroyes this item by disconnecting any signals that may exist.  This
+        is called when the tree clears itself or is deleted.  If you are
+        manually removing an item, you should call the destroy method yourself.
+        This is required since Python allows for non-QObject connections, and
+        since QTreeWidgetItem's are not QObjects', they do not properly handle
+        being destroyed with connections on them.
+        """
+        tree = self.treeWidget()
+        try:
+            tree.destroyed.disconnect(self.destroy)
+        except StandardError:
+            pass
+        
+        for movie in set(self._movies.values()):
+            try:
+                movie.frameChanged.disconnect(self._updateFrame)
+            except StandardError:
+                pass
     
     def children(self, recursive=False):
         """
@@ -453,17 +472,23 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
                     movie  | <QtGui.QMovie> || None
         """
         curr = self._movies.get(column)
-        if curr is not None:
-            curr.frameChanged.disconnect(self._updateFrame)
+        if curr == movie:
+            return True
+        else:
+            try:
+                curr.frameChanged.disconnect(self._updateFrame)
+            except StandardError:
+                pass
         
         if movie is not None:
             self._movies[column] = movie
             self.setIcon(column, QtGui.QIcon(movie.currentPixmap()))
             
-            movie.frameChanged.connect(self._updateFrame)
-            
-            tree = self.treeWidget()
-            tree.destroyed.connect(self.cleanup)
+            try:
+                movie.frameChanged.connect(self._updateFrame,
+                                           QtCore.Qt.UniqueConnection)
+            except StandardError:
+                pass
         else:
             self._movies.pop(column, None)
     
