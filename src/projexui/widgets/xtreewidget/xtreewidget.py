@@ -74,7 +74,7 @@ class XTreeWidget(QtGui.QTreeWidget):
     HoverMode = enum('NoHover', 'HoverRows', 'HoverItems')
     TraverseMode = enum('DepthFirst', 'BreadthFirst')
     
-    def __init__( self, parent = None, delegateClass = None ):
+    def __init__(self, parent=None, delegateClass=None):
         super(XTreeWidget, self).__init__(parent)
         
         if delegateClass is None:
@@ -190,12 +190,12 @@ class XTreeWidget(QtGui.QTreeWidget):
             self._lockedView.deleteLater()
             self._lockedView = None
     
-    def __filterItems( self, 
-                       terms, 
-                       autoExpand = True, 
-                       caseSensitive = False,
-                       parent = None,
-                       level = 0):
+    def __filterItems(self,
+                      terms,
+                      autoExpand=True, 
+                      caseSensitive=False,
+                      parent=None,
+                      level=0):
         """
         Filters the items in this tree based on the inputed keywords.
         
@@ -208,14 +208,14 @@ class XTreeWidget(QtGui.QTreeWidget):
         """
         # make sure we're within our mex level for filtering
         max_level = self.maximumFilterLevel()
-        if ( max_level != None and level > max_level ):
+        if max_level != None and level > max_level:
             return False
         
         found = False
         items = []
         
         # collect the items to process
-        if ( not parent ):
+        if not parent:
             for i in range(self.topLevelItemCount()):
                 items.append(self.topLevelItem(i))
         else:
@@ -223,27 +223,19 @@ class XTreeWidget(QtGui.QTreeWidget):
                 items.append(parent.child(c))
         
         for item in items:
-            # process all the children first
-            cfound = self.__filterItems(terms, 
-                                       autoExpand, 
-                                       caseSensitive,
-                                       item,
-                                       level + 1)
-            
             # if there is no filter keywords, then all items will be visible
-            if ( not any(terms.values()) ):
+            if not any(terms.values()):
                 found = True
                 item.setHidden(False)
-                if ( autoExpand ):
-                    item.setExpanded(False)
-            
-            # if there is filter text and children are visible, force this item
-            # to be visible always
-            elif ( cfound ):
-                found = True
-                item.setHidden(False)
-                if ( autoExpand and item.childCount() ):
-                    item.setExpanded(True)
+                if autoExpand:
+                    if item.parent() is not None or self.rootIsDecorated():
+                        item.setExpanded(False)
+                
+                self.__filterItems(terms,
+                                   autoExpand, 
+                                   caseSensitive,
+                                   item,
+                                   level + 1)
             
             else:
                 # match all generic keywords
@@ -258,7 +250,7 @@ class XTreeWidget(QtGui.QTreeWidget):
                 
                 for column in self._filteredColumns:
                     # determine the check text based on case sensitivity
-                    if ( caseSensitive ):
+                    if caseSensitive:
                         check = nativestring(item.text(column))
                     else:
                         check = nativestring(item.text(column)).lower()
@@ -267,52 +259,60 @@ class XTreeWidget(QtGui.QTreeWidget):
                     
                     # make sure all the keywords match
                     for key in generic + specific:
-                        if ( not key ):
+                        if not key:
                             continue
                         
                         # look for exact keywords
-                        elif ( key.startswith('"') and key.endswith('"') ):
-                            if ( key.strip('"') == check ):
-                                if ( key in generic ):
+                        elif key.startswith('"') and key.endswith('"'):
+                            if key.strip('"') == check:
+                                if key in generic:
                                     generic_found[key] = True
                                 
-                                if ( key in specific ):
+                                if key in specific:
                                     col_found[column] = True
                         
                         # look for ending keywords
-                        elif ( key.startswith('*') and not key.endswith('*') ):
-                            if ( check.endswith(key.strip('*')) ):
-                                if ( key in generic ):
+                        elif key.startswith('*') and not key.endswith('*'):
+                            if check.endswith(key.strip('*')):
+                                if key in generic:
                                     generic_found[key] = True
-                                if ( key in specific ):
+                                if key in specific:
                                     col_found[column] = True
                         
                         # look for starting keywords
-                        elif ( key.endswith('*') and not key.startswith('*') ):
-                            if ( check.startswith(key.strip('*')) ):
-                                if ( key in generic ):
+                        elif key.endswith('*') and not key.startswith('*'):
+                            if check.startswith(key.strip('*')):
+                                if key in generic:
                                     generic_found[key] = True
-                                if ( key in specific ):
+                                if key in specific:
                                     col_found[column] = True
                         
                         # look for generic keywords
-                        elif ( key.strip('*') in check ):
-                            if ( key in generic ):
+                        elif key.strip('*') in check:
+                            if key in generic:
                                 generic_found[key] = True
-                            if ( key in specific ):
+                            if key in specific:
                                 col_found[column] = True
                     
                     mfound = all(col_found.values()) and \
                              all(generic_found.values())
-                    if ( mfound ):
+                    if mfound:
                         break
+                
+                # if this item is not found, then check all children
+                if not mfound:
+                    mfound = self.__filterItems(terms,
+                                                autoExpand, 
+                                                caseSensitive,
+                                                item,
+                                                level + 1)
                 
                 item.setHidden(not mfound)
                 
-                if ( mfound ):
+                if mfound:
                     found = True
                 
-                if ( mfound and autoExpand and item.childCount() ):
+                if mfound and autoExpand and item.childCount():
                     item.setExpanded(True)
         
         return found
@@ -883,10 +883,10 @@ class XTreeWidget(QtGui.QTreeWidget):
         return self._filteredColumns
     
     @Slot(str)
-    def filterItems( self, 
-                     terms, 
-                     autoExpand = True, 
-                     caseSensitive = False ):
+    def filterItems(self,
+                    terms,
+                    autoExpand=True,
+                    caseSensitive=False):
         """
         Filters the items in this tree based on the inputed text.
         
@@ -895,18 +895,18 @@ class XTreeWidget(QtGui.QTreeWidget):
                     caseSensitive   | <bool>
         """
         # create a dictionary of options
-        if ( type(terms) != dict ):
+        if type(terms) != dict:
             terms = {'*': nativestring(terms)}
         
         # create a dictionary of options
-        if ( type(terms) != dict ):
+        if type(terms) != dict:
             terms = {'*': nativestring(terms)}
         
         # validate the "all search"
-        if ( '*' in terms and type(terms['*']) != list ):
+        if '*' in terms and type(terms['*']) != list:
             sterms = nativestring(terms['*'])
             
-            if ( not sterms.strip() ):
+            if not sterms.strip():
                 terms.pop('*')
             else:
                 dtype_matches = COLUMN_FILTER_EXPR.findall(sterms)
@@ -918,7 +918,7 @@ class XTreeWidget(QtGui.QTreeWidget):
                     terms[dtype] += values.split(',')
                 
                 keywords = sterms.replace(',', '').split()
-                while ( '' in keywords ):
+                while '' in keywords:
                     keywords.remove('')
                 
                 terms['*'] = keywords
@@ -928,10 +928,10 @@ class XTreeWidget(QtGui.QTreeWidget):
         filter_terms = {}
         for column, keywords in terms.items():
             index = self.column(column)
-            if ( column != '*' and not index in filtered_columns ):
+            if column != '*' and not index in filtered_columns:
                 continue
             
-            if ( not caseSensitive ):
+            if not caseSensitive:
                 keywords = [nativestring(keyword).lower() for keyword in keywords]
             else:
                 keywords = map(str, keywords)
