@@ -142,6 +142,17 @@ class XLoggerWidget(QtGui.QTextEdit):
         self._loggers.add(logger)
         self.handler().setLoggerLevel(logger, level)
     
+    def cleanup(self):
+        self._destroyed = True
+        
+        try:
+            self._handler.dispatch().messageLogged.disconnect(self.log)
+            self.destroyed.disconnect(self.markDestroyed)
+        except StandardError:
+            pass
+        
+        self.markDestroyed()
+    
     def clear(self):
         super(XLoggerWidget, self).clear()
         

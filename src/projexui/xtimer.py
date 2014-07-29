@@ -16,7 +16,6 @@ __license__         = 'LGPL'
 __maintainer__      = 'Projex Software'
 __email__           = 'team@projexsoftware.com'
 
-import threading
 from xqt import QtCore
 
 class XTimer(QtCore.QObject):
@@ -56,7 +55,7 @@ class XTimer(QtCore.QObject):
         self.__active = False
         self.__singleShot = False
         self.__interval = 0
-        self.__lock = threading.Lock()
+        self.__lock = QtCore.QReadWriteLock()
 
     def interval(self):
         """
@@ -64,8 +63,8 @@ class XTimer(QtCore.QObject):
         
         :return     <int> | msecs
         """
-        with self.__lock:
-            return self.__interval
+        locker = QtCore.QReadLocker(self.__lock)
+        return self.__interval
 
     def isActive(self):
         """
@@ -73,8 +72,8 @@ class XTimer(QtCore.QObject):
         
         :return     <bool>
         """
-        with self.__lock:
-            return self.__active
+        locker = QtCore.QReadLocker(self.__lock)
+        return self.__active
 
     def isSingleShot(self):
         """
@@ -82,8 +81,8 @@ class XTimer(QtCore.QObject):
         
         :return     <bool>
         """
-        with self.__lock:
-            return self.__singleShot
+        locker = QtCore.QReadLocker(self.__lock)
+        return self.__singleShot
 
     def setInterval(self, msecs):
         """
@@ -91,8 +90,9 @@ class XTimer(QtCore.QObject):
         
         :param      msecs | <int>
         """
-        with self.__lock:
-            self.__interval = msecs
+        self.__lock.lockForWrite()
+        self.__interval = msecs
+        self.__lock.unlock()
 
     def setSingleShot(self, state):
         """
@@ -100,8 +100,9 @@ class XTimer(QtCore.QObject):
         
         :param      state | <bool>
         """
-        with self.__lock:
-            self.__singleShot = state
+        self.__lock.lockForWrite()
+        self.__singleShot = state
+        self.__lock.unlock()
 
     def start(self, interval=None):
         """
@@ -111,11 +112,13 @@ class XTimer(QtCore.QObject):
         if interval is not None:
             self.setInterval(interval)
         
-        with self.__lock:
-            if self.__active:
-                return
-            
+        self.__lock.lockForWrite()
+        if self.__active:
+            self.__lock.unlock()
+            return
+        else:
             self.__active = True
+            self.__lock.unlock()
         
         QtCore.QTimer.singleShot(self.interval(), self.trigger)
 
@@ -124,23 +127,29 @@ class XTimer(QtCore.QObject):
         Emits the stop requested signal for this timer, effectivly stopping its
         internal timer.
         """
-        with self.__lock:
-            self.__active = False
+        self.__lock.lockForWrite()
+        self.__active = False
+        self.__lock.unlock()
 
     def trigger(self):
         """
         Emits the timeout signal, provided this timer is still active.
         """
-        with self.__lock:
-            if not self.__active:
-                return
-            
-            reify = not self.__singleShot
+        # triggers the signal
+        self.__lock.lockForRead()
+        if not self.__active:
+            return
+        reify = not self.__singleShot
+        self.__lock.unlock()
         
         try:
             self.timeout.emit()
+        
         except StandardError:
+            # reset the active flag
+            self.__lock.lockForWrite()
             self.__active = False
+            self.__lock.unlock()
             raise
         
         if reify:

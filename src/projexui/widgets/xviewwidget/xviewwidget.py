@@ -242,7 +242,16 @@ class XViewWidget(QScrollArea):
             return
             
         profile.restore(self)
+    
+    def isEmpty(self):
+        """
+        Returns whether or not there are any XView widgets loaded for this
+        widget.
         
+        :return     <bool>
+        """
+        return len(self.findChildren(XView)) == 0
+    
     def isLocked(self):
         """
         Returns whether or not this widget is in locked mode.

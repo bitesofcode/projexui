@@ -28,8 +28,7 @@ class XConsoleView(XView):
         self.initialized.connect(self.setupConsole)
 
     def closeEvent(self, event):
-        self._console.deleteLater()
-        self._console = None
+        self._console.cleanup()
         
         super(XConsoleView, self).closeEvent(event)
 
@@ -45,3 +44,4 @@ class XConsoleView(XView):
         return self._console
 
 XConsoleView.setViewName('Console')
+

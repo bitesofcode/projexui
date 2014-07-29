@@ -25,8 +25,7 @@ class XLogRecordView(XView):
         self.setLayout(layout)
 
     def closeEvent(self, event):
-        self._logger.deleteLater()
-        self._logger = None
+        self._logger.cleanup()
         
         super(XLogRecordView, self).closeEvent(event)
 

@@ -1,9 +1,11 @@
-""" [desc] """
+""" Defines the Logging record widget. """
 
-__authors__ = ['Dave Stewart', 'Otto Chiu', 'Weifeng Li', 'Eric Hulser']
-__author__ = ', '.join(__authors__)
-__email__ = 'toolbox@teslamotors.com'
-__copyright__ = 'Copyright Tesla Motors Inc. 2014'
+# define authorship information
+__authors__         = ['Eric Hulser']
+__author__          = ','.join(__authors__)
+__credits__         = []
+__copyright__       = 'Copyright (c) 2011, Projex Software'
+__license__         = 'LGPL'
 
 #------------------------------------------------------------------------------
 

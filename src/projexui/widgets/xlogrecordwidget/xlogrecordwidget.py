@@ -1,9 +1,11 @@
-""" [desc] """
+""" Defines logging record widget. """
 
-__authors__ = ['Dave Stewart', 'Otto Chiu', 'Weifeng Li', 'Eric Hulser']
-__author__ = ', '.join(__authors__)
-__email__ = 'toolbox@teslamotors.com'
-__copyright__ = 'Copyright Tesla Motors Inc. 2014'
+# define authorship information
+__authors__         = ['Eric Hulser']
+__author__          = ','.join(__authors__)
+__credits__         = []
+__copyright__       = 'Copyright (c) 2011, Projex Software'
+__license__         = 'LGPL'
 
 #------------------------------------------------------------------------------
 
@@ -81,6 +83,7 @@ class XLogRecordWidget(QtGui.QWidget):
         
         # define custom properties
         self._handler = XLogRecordHandler(self)
+        self._destroyed = False
         self._loggers = set()
         self._activeLevels = []
         self._queue = []
@@ -118,8 +121,10 @@ class XLogRecordWidget(QtGui.QWidget):
         # create connections
         self._timer.timeout.connect(self.loadQueue)
         self._handler.dispatch().recordLogged.connect(self.addRecord)
+        
         self.uiRecordBTN.toggled.connect(self.updateUi)
         self.uiRecordTREE.customContextMenuRequested.connect(self.showMenu)
+        self.destroyed.connect(self.markDestroyed)
 
     def activeLevels(self):
         """
@@ -160,10 +165,26 @@ class XLogRecordWidget(QtGui.QWidget):
         
         :param      record | <logging.LogRecord>
         """
+        if self._destroyed:
+            return
+        
         if not self.uiRecordBTN.isChecked():
             return
         
         self._queue.append(record)
+
+    def cleanup(self):
+        self._destroyed = True
+        
+        try:
+            self._handler.dispatch().recordLogged.disconnect(self.addRecord)
+        except StandardError:
+            pass
+        
+        try:
+            self._timer.stop()
+        except StandardError:
+            pass
 
     def clear(self):
         """
@@ -230,6 +251,9 @@ class XLogRecordWidget(QtGui.QWidget):
         :return     {<str> logger: <int> level, ..}
         """
         return self._handler.loggerLevels()
+    
+    def markDestroyed(self):
+        self._destroyed = True
     
     def removeLogger(self, logger):
         """
