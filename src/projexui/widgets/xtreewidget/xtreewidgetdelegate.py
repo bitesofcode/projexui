@@ -271,7 +271,7 @@ class XTreeWidgetDelegate(QtGui.QItemDelegate):
                     rect    | <QtCore.QRect>
                     index   | <QtGui.QModelIndex>
         """
-        if ( not self.showGrid() ):
+        if not self.showGrid():
             return
         
         painter.setBrush(QtCore.Qt.NoBrush)
@@ -536,16 +536,16 @@ class XTreeWidgetDelegate(QtGui.QItemDelegate):
         backgroundRect = QtCore.QRect(0, 0, opt.rect.width(), opt.rect.height())
         
         # draw the item
-        self.drawBackground( painter, opt, backgroundRect, bg)
+        self.drawBackground(painter, opt, backgroundRect, bg)
         
         painter.setBrush(QtCore.Qt.NoBrush)
         painter.setPen(fg.color())
         
-        self.drawCheck(      painter, opt, checkRect,      checkState)
+        self.drawCheck(painter, opt, checkRect, checkState)
         self.drawDecoration( painter, opt, decorationRect, pixmap)
-        self.drawOverlay(    painter, opt, overlayRect,    overlay)
-        self.drawDisplay(    painter, opt, displayRect,    text)
-        self.drawGrid(       painter, opt, backgroundRect, index)
+        self.drawOverlay(painter, opt, overlayRect, overlay)
+        self.drawDisplay(painter, opt, displayRect, text)
+        self.drawGrid(painter, opt, backgroundRect, index)
         
         painter.restore()
     

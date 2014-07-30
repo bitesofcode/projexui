@@ -430,7 +430,7 @@ class XLineEdit(QLineEdit):
             self.selectAll()
             self._focusedIn = False
     
-    def paintEvent( self, event ):
+    def paintEvent(self, event):
         """
         Overloads the paint event to paint additional \
         hint information if no text is set on the \
