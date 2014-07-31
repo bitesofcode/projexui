@@ -46,16 +46,51 @@ class XTimer(QtCore.QObject):
             |>>> ttimer.stop()
             |>>> 
     """
+    _startRequested = QtCore.Signal(int)
+    _stopRequested = QtCore.Signal()
+    
     timeout = QtCore.Signal()
     
     def __init__(self, parent=None):
         super(XTimer, self).__init__(parent)
         
         # define custom properties
+        self.__timer = None
         self.__active = False
         self.__singleShot = False
         self.__interval = 0
         self.__lock = QtCore.QReadWriteLock()
+        
+        # create connections
+        self._startRequested.connect(self._start)
+        self._stopRequested.connect(self._stop)
+
+    def _start(self, interval):
+        """
+        Starts the internal timer.
+        
+        :param      interval | <int>
+        """
+        with QtCore.QWriteLocker(self.__lock):
+            if not self.__timer:
+                self.__timer = QtCore.QTimer(self)
+                self.__timer.setSingleShot(self.__interval)
+                self.__timer.setInterval(interval)
+                self.__timer.timeout.connect(self.timeout)
+        
+        self.__timer.start(interval)
+
+    def _stop(self):
+        """
+        Stops the internal timer, if one exists.
+        
+        :param      stop | <int>
+        """
+        with QtCore.QReadLocker(self.__lock):
+            try:
+                self.__timer.stop()
+            except AttributeError:
+                pass
 
     def interval(self):
         """
@@ -63,8 +98,8 @@ class XTimer(QtCore.QObject):
         
         :return     <int> | msecs
         """
-        locker = QtCore.QReadLocker(self.__lock)
-        return self.__interval
+        with QtCore.QReadLocker(self.__lock):
+            return self.__interval
 
     def isActive(self):
         """
@@ -72,8 +107,11 @@ class XTimer(QtCore.QObject):
         
         :return     <bool>
         """
-        locker = QtCore.QReadLocker(self.__lock)
-        return self.__active
+        try:
+            with QtCore.QReadLocker(self.__lock):
+                return self.__timer.isActive()
+        except AttributeError:
+            return False
 
     def isSingleShot(self):
         """
@@ -81,8 +119,8 @@ class XTimer(QtCore.QObject):
         
         :return     <bool>
         """
-        locker = QtCore.QReadLocker(self.__lock)
-        return self.__singleShot
+        with QtCore.QReadLocker(self.__lock):
+            return self.__singleShot
 
     def setInterval(self, msecs):
         """
@@ -90,9 +128,8 @@ class XTimer(QtCore.QObject):
         
         :param      msecs | <int>
         """
-        self.__lock.lockForWrite()
-        self.__interval = msecs
-        self.__lock.unlock()
+        with QtCore.QWriteLocker(self.__lock):
+            self.__interval = msecs
 
     def setSingleShot(self, state):
         """
@@ -100,60 +137,32 @@ class XTimer(QtCore.QObject):
         
         :param      state | <bool>
         """
-        self.__lock.lockForWrite()
-        self.__singleShot = state
-        self.__lock.unlock()
+        with QtCore.QWriteLocker(self.__lock):
+            self.__singleShot = state
 
     def start(self, interval=None):
         """
         Emits the start requested signal for this timer, effectively starting
         its internal timer.
+        
+        :param      interval | <int>
         """
-        if interval is not None:
-            self.setInterval(interval)
+        # update the interval value
+        with QtCore.QReadLocker(self.__lock):
+            if interval is None:
+                interval = self.__interval
+            else:
+                self.__interval = interval
         
-        self.__lock.lockForWrite()
-        if self.__active:
-            self.__lock.unlock()
-            return
-        else:
-            self.__active = True
-            self.__lock.unlock()
-        
-        QtCore.QTimer.singleShot(self.interval(), self.trigger)
+        # request the timer to start
+        self._startRequested.emit(interval)
 
     def stop(self):
         """
         Emits the stop requested signal for this timer, effectivly stopping its
         internal timer.
         """
-        self.__lock.lockForWrite()
-        self.__active = False
-        self.__lock.unlock()
-
-    def trigger(self):
-        """
-        Emits the timeout signal, provided this timer is still active.
-        """
-        # triggers the signal
-        self.__lock.lockForRead()
-        if not self.__active:
-            return
-        reify = not self.__singleShot
-        self.__lock.unlock()
-        
-        try:
-            self.timeout.emit()
-        
-        except StandardError:
-            # reset the active flag
-            self.__lock.lockForWrite()
-            self.__active = False
-            self.__lock.unlock()
-            raise
-        
-        if reify:
-            QtCore.QTimer.singleShot(self.interval(), self.trigger)
+        self._stopRequested.emit()
 
     singleShot = QtCore.QTimer.singleShot
 
