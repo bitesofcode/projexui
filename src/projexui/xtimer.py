@@ -145,19 +145,6 @@ class XTimer(QtCore.QObject):
         with QtCore.QReadLocker(self.__lock):
             return self.__singleShot
 
-    def moveToThread(self, thread):
-        """
-        Moves this timer object to its own thread.  If the timer is already
-        running, then we need to stop it before it is moved.
-        
-        :param      thread | <QtCore.QThread>
-        """
-        if self.__timer:
-            self.stop()
-            raise RuntimeError('QTimer exists on another thread.')
-        
-        super(XTimer, self).moveToThread(thread)
-
     def setInterval(self, msecs):
         """
         Sets the interval in milliseconds for this timer.
