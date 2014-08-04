@@ -24,6 +24,7 @@ import weakref
 from projex.text import nativestring
 from projexui import resources
 from xqt import QtCore, QtGui
+from projexui.xpainter import XPainter
 
 DATATYPE_FILTER_EXPR = re.compile('((\w+):([\w,\*]+|"[^"]+"?))')
 
@@ -512,9 +513,9 @@ class XListWidget(QtGui.QListWidget):
             clr     = self.hintColor()
             
             # paint the hint
-            painter = QtGui.QPainter(self.viewport())
-            painter.setPen(clr)
-            painter.drawText(rect, align | QtCore.Qt.TextWordWrap, text)
+            with XPainter(self.viewport()) as painter:
+                painter.setPen(clr)
+                painter.drawText(rect, align | QtCore.Qt.TextWordWrap, text)
     
     def resizeEvent(self, event):
         super(XListWidget, self).resizeEvent(event)

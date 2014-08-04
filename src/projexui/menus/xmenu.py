@@ -46,6 +46,7 @@ from projexui.qt.QtGui  import QCursor,\
                                QWidgetAction,\
                                QHBoxLayout
 
+from projexui.xpainter import XPainter
 from projexui.widgets.xtreewidget import XTreeWidget, XTreeWidgetItem
 from projexui.widgets.xlineedit import XLineEdit
 from projexui import resources
@@ -423,22 +424,18 @@ class XMenu(QMenu):
         """
         super(XMenu, self).paintEvent(event)
         
-        if ( self.showTitle() ):
-            painter = QPainter()
-            painter.begin(self)
-            
-            palette = self.palette()
-            
-            painter.setBrush(palette.color(palette.Button))
-            painter.setPen(Qt.NoPen)
-            painter.drawRect(1, 1, self.width() - 2, 22)
-            
-            painter.setBrush(Qt.NoBrush)
-            painter.setPen(palette.color(palette.ButtonText))
-            painter.drawText(1, 1, self.width() - 2, 22, 
-                             Qt.AlignCenter, self.title())
-            
-            painter.end()
+        if self.showTitle():
+            with XPainter(self) as painter:
+                palette = self.palette()
+                
+                painter.setBrush(palette.color(palette.Button))
+                painter.setPen(Qt.NoPen)
+                painter.drawRect(1, 1, self.width() - 2, 22)
+                
+                painter.setBrush(Qt.NoBrush)
+                painter.setPen(palette.color(palette.ButtonText))
+                painter.drawText(1, 1, self.width() - 2, 22, 
+                                 Qt.AlignCenter, self.title())
     
     def rebuildButtons(self):
         """

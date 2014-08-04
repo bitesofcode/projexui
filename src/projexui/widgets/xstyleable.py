@@ -11,6 +11,7 @@ __credits__     = []
 __copyright__   = 'Copyright (c) 2011, Projex Software'
 
 from projexui.qt import QtGui
+from projexui.xpainter import XPainter
 
 class XStyleableMixin(object):
     StyleOptionClass = QtGui.QStyleOption
@@ -19,8 +20,8 @@ class XStyleableMixin(object):
         raise NotImplementedError
 
     def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
-        self.drawStyle(self.style(), painter, self.styleOption())
+        with XPainter(self) as painter:
+            self.drawStyle(self.style(), painter, self.styleOption())
 
     def styleOption(self):
         opt = self.StyleOptionClass()

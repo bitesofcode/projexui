@@ -28,13 +28,13 @@ from projexui.qt.QtCore import  QSize,\
 from projexui.qt.QtGui import QFontMetrics,\
                               QLineEdit,\
                               QPalette,\
-                              QPainter,\
                               QIcon,\
                               QColor,\
                               QApplication
 
 import projex.text
 from projex.enum import enum
+from projexui.xpainter import XPainter
 
 import projexui.resources
 
@@ -445,45 +445,45 @@ class XLineEdit(QLineEdit):
             return
         
         # paint the hint text
-        painter = QPainter(self)
-        painter.setPen(self.hintColor())
-        
-        icon = self.icon()
-        left, top, right, bottom = self.getTextMargins()
-        
-        w = self.width()
-        h = self.height() - 2
-        
-        w -= (right + left)
-        h -= (bottom + top)
-        
-        if icon and not icon.isNull():
-            size = icon.actualSize(self.iconSize())
-            x    = self.cornerRadius() + 2
-            y    = (self.height() - size.height()) / 2.0
+        with XPainter(self) as painter:
+            painter.setPen(self.hintColor())
             
-            painter.drawPixmap(x, y, icon.pixmap(size.width(), size.height()))
+            icon = self.icon()
+            left, top, right, bottom = self.getTextMargins()
             
-            w -= size.width() - 2
-        else:
-            x = 6 + left
-        
-        w -= self._buttonWidth
-        y = 2 + top
-        
-        # create the elided hint
-        if not self.text() and self.hint():
-            rect    = self.cursorRect()
-            metrics = QFontMetrics(self.font())
-            hint    = metrics.elidedText(self.hint(), Qt.ElideRight, w)
-            align   = self.alignment()
+            w = self.width()
+            h = self.height() - 2
             
-            if align & Qt.AlignHCenter:
-                x = 0
+            w -= (right + left)
+            h -= (bottom + top)
+            
+            if icon and not icon.isNull():
+                size = icon.actualSize(self.iconSize())
+                x    = self.cornerRadius() + 2
+                y    = (self.height() - size.height()) / 2.0
+                
+                painter.drawPixmap(x, y, icon.pixmap(size.width(), size.height()))
+                
+                w -= size.width() - 2
             else:
-                x = rect.center().x()
+                x = 6 + left
             
-            painter.drawText(x, y, w, h, align, hint)
+            w -= self._buttonWidth
+            y = 2 + top
+            
+            # create the elided hint
+            if not self.text() and self.hint():
+                rect    = self.cursorRect()
+                metrics = QFontMetrics(self.font())
+                hint    = metrics.elidedText(self.hint(), Qt.ElideRight, w)
+                align   = self.alignment()
+                
+                if align & Qt.AlignHCenter:
+                    x = 0
+                else:
+                    x = rect.center().x()
+                
+                painter.drawText(x, y, w, h, align, hint)
         
     def resizeEvent( self, event ):
         """

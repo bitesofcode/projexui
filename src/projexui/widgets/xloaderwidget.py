@@ -29,12 +29,12 @@ from projexui.qt.QtGui import QApplication,\
                               QFrame,\
                               QMovie,\
                               QHBoxLayout,\
-                              QPainter,\
                               QProgressBar,\
                               QVBoxLayout,\
                               QWidget,\
                               QSplitter
 
+from projexui.xpainter import XPainter
 from projex.enum import enum
 import projexui.resources
 
@@ -48,29 +48,25 @@ class XLoaderProgressBar(QProgressBar):
         self.setValue(0)
     
     def paintEvent( self, event ):
-        painter = QPainter()
-        painter.begin(self)
-        
-        x = 0
-        y = 0
-        w = self.width() - 1
-        h = self.height() - 1
-        
-        # draw percent
-        maximum = float(self.maximum())
-        if not maximum:
-            maximum = 1.0
-        
-        perc = self.value() / maximum
-        painter.setBrush(Qt.gray)
-        painter.drawRect(x,(self.height() - 8) / 2, w * perc, 8)
-        
-        # draw border
-        painter.setBrush( Qt.NoBrush )
-        painter.setPen( Qt.white )
-        painter.drawRect( x, (self.height() - 8) / 2, w, 8)
-        
-        painter.end()
+        with XPainter(self) as painter:
+            x = 0
+            y = 0
+            w = self.width() - 1
+            h = self.height() - 1
+            
+            # draw percent
+            maximum = float(self.maximum())
+            if not maximum:
+                maximum = 1.0
+            
+            perc = self.value() / maximum
+            painter.setBrush(Qt.gray)
+            painter.drawRect(x,(self.height() - 8) / 2, w * perc, 8)
+            
+            # draw border
+            painter.setBrush( Qt.NoBrush )
+            painter.setPen( Qt.white )
+            painter.drawRect( x, (self.height() - 8) / 2, w, 8)
 
 #------------------------------------------------------------------------------
 

@@ -102,7 +102,7 @@ class XTimer(QtCore.QObject):
             self.__timer.setSingleShot(self.__singleShot)
             self.__timer.setInterval(interval)
             self.__timer.timeout.connect(self.timeout)
-    
+        
         self.__timer.start(interval)
 
     def _stopTimer(self):
@@ -144,6 +144,19 @@ class XTimer(QtCore.QObject):
         """
         with QtCore.QReadLocker(self.__lock):
             return self.__singleShot
+
+    def moveToThread(self, thread):
+        """
+        Moves this timer object to its own thread.  If the timer is already
+        running, then we need to stop it before it is moved.
+        
+        :param      thread | <QtCore.QThread>
+        """
+        if self.__timer:
+            self.stop()
+            raise RuntimeError('QTimer exists on another thread.')
+        
+        super(XTimer, self).moveToThread(thread)
 
     def setInterval(self, msecs):
         """

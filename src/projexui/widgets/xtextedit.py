@@ -16,7 +16,6 @@ __email__       = 'team@projexsoftware.com'
 from projexui.qt import Property, Slot, Signal
 from projexui.qt.QtCore import Qt
 from projexui.qt.QtGui import QTextEdit,\
-                              QPainter,\
                               QColor,\
                               QApplication,\
                               QDialog,\
@@ -25,6 +24,7 @@ from projexui.qt.QtGui import QTextEdit,\
                               QDialogButtonBox
 
 import projex.text
+from projexui.xpainter import XPainter
 
 class XTextEdit(QTextEdit):
     focusEntered = Signal()
@@ -190,9 +190,9 @@ class XTextEdit(QTextEdit):
             clr = self.hintColor()
             
             # paint the hint
-            painter = QPainter(self.viewport())
-            painter.setPen(clr)
-            painter.drawText(rect, align | Qt.TextWordWrap, text)
+            with XPainter(self.viewport()) as painter:
+                painter.setPen(clr)
+                painter.drawText(rect, align | Qt.TextWordWrap, text)
     
     @Slot()
     def paste(self):

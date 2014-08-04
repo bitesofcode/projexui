@@ -13,6 +13,7 @@ __email__           = 'team@projexsoftware.com'
 
 import os
 from projexui import resources
+from projexui.xpainter import XPainter
 from xqt import QtCore, QtGui
 
 class XSwitchButton(QtGui.QAbstractButton):
@@ -93,8 +94,8 @@ class XSwitchButton(QtGui.QAbstractButton):
         pixmap = self.currentPixmap()
         rect   = self.currentPixmapRect()
         
-        painter = QtGui.QPainter(self)
-        painter.drawPixmap(rect.x(), rect.y(), pixmap)
+        with XPainter(self) as painter:
+            painter.drawPixmap(rect.x(), rect.y(), pixmap)
     
     def setOffPixmap(self, pixmap):
         """

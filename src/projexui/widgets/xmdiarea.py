@@ -16,6 +16,7 @@ __email__           = 'team@projexsoftware.com'
 from projexui import resources
 from projexui.qt import QtCore, QtGui
 from projexui.widgets.xtoolbutton import XToolButton
+from projexui.xpainter import XPainter
 
 class XMdiSubWindow(QtGui.QMdiSubWindow):
     def __init__(self, parent, windowFlags=0):
@@ -92,35 +93,35 @@ class XMdiSubWindow(QtGui.QMdiSubWindow):
         palette = self.palette()
         
         # draw the title
-        painter = QtGui.QPainter(self)
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        painter.setPen(self.titleBarBorder())
-        painter.setBrush(self.titleBarBackground())
-        painter.drawRect(0, 0, self.width(), 29)
-        
-        grad = QtGui.QLinearGradient()
-        grad.setColorAt(0, QtGui.QColor(255, 255, 255, 30))
-        grad.setColorAt(1, QtGui.QColor(0, 0, 0, 28))
-        grad.setStart(0, 0)
-        grad.setFinalStop(0, 30)
-        
-        painter.setPen(QtCore.Qt.NoPen)
-        painter.setBrush(grad)
-        painter.drawRect(0, 0, self.width(), 30)
-        
-        # draw the text
-        painter.setFont(self.titleBarFont())
-        
-        bg = self.titleBarBackground()
-        painter.setPen(bg.lighter(110))
-        painter.drawText(45, 1, self.width(), 30,
-                         QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
-                         self.windowTitle())
-        
-        painter.setPen(self.titleBarForeground())
-        painter.drawText(45, 0, self.width(), 30,
-                         QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
-                         self.windowTitle())
+        with XPainter(self) as painter:
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
+            painter.setPen(self.titleBarBorder())
+            painter.setBrush(self.titleBarBackground())
+            painter.drawRect(0, 0, self.width(), 29)
+            
+            grad = QtGui.QLinearGradient()
+            grad.setColorAt(0, QtGui.QColor(255, 255, 255, 30))
+            grad.setColorAt(1, QtGui.QColor(0, 0, 0, 28))
+            grad.setStart(0, 0)
+            grad.setFinalStop(0, 30)
+            
+            painter.setPen(QtCore.Qt.NoPen)
+            painter.setBrush(grad)
+            painter.drawRect(0, 0, self.width(), 30)
+            
+            # draw the text
+            painter.setFont(self.titleBarFont())
+            
+            bg = self.titleBarBackground()
+            painter.setPen(bg.lighter(110))
+            painter.drawText(45, 1, self.width(), 30,
+                             QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
+                             self.windowTitle())
+            
+            painter.setPen(self.titleBarForeground())
+            painter.drawText(45, 0, self.width(), 30,
+                             QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
+                             self.windowTitle())
 
     def resizeEvent(self, event):
         super(XMdiSubWindow, self).resizeEvent(event)

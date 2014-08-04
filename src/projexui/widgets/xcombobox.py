@@ -25,9 +25,10 @@ try:
 except ImportError:
     nativestring = str
 
+from projexui.xpainter import XPainter
 from projexui.qt import Signal, Slot, Property
 from projexui.qt.QtCore import Qt, QPoint
-from projexui.qt.QtGui import QComboBox, QListView, QColor, QPainter, QPixmap
+from projexui.qt.QtGui import QComboBox, QListView, QColor, QPixmap
 
 from projexui import resources
 from projexui.widgets.xlineedit import XLineEdit
@@ -296,28 +297,29 @@ class XComboBox(QComboBox):
             if not text and self._hint and not self.lineEdit():
                 text = self._hint
                 palette = self.palette()
-                painter = QPainter(self)
-                painter.setPen(palette.color(palette.Disabled, palette.Text))
-                painter.drawText(5, 0, self.width(), self.height(),
-                                 Qt.AlignLeft | Qt.AlignVCenter,
-                                 self.currentText())
+                with XPainter(self) as painter:
+                    painter.setPen(palette.color(palette.Disabled, palette.Text))
+                    painter.drawText(5, 0, self.width(), self.height(),
+                                     Qt.AlignLeft | Qt.AlignVCenter,
+                                     self.currentText())
             
         else:
             palette = self.palette()
-            painter = QPainter(self)
-            text = QComboBox.currentText(self)
-            if not text:
-                text = self.hint()
-                painter.setPen(palette.color(palette.Disabled,
-                                             palette.WindowText))
             
-            painter.drawText(5, 0, self.width(), self.height(),
-                             Qt.AlignLeft | Qt.AlignVCenter, text)
-            
-            x = self.width() - 15
-            y = 4
-            pixmap = QPixmap(resources.find('img/treeview/triangle_down.png'))
-            painter.drawPixmap(x, y, pixmap)
+            with XPainter(self) as painter:
+                text = QComboBox.currentText(self)
+                if not text:
+                    text = self.hint()
+                    painter.setPen(palette.color(palette.Disabled,
+                                                 palette.WindowText))
+                
+                painter.drawText(5, 0, self.width(), self.height(),
+                                 Qt.AlignLeft | Qt.AlignVCenter, text)
+                
+                x = self.width() - 15
+                y = 4
+                pixmap = QPixmap(resources.find('img/treeview/triangle_down.png'))
+                painter.drawPixmap(x, y, pixmap)
     
     def separator( self ):
         """

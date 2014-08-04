@@ -17,9 +17,9 @@ from projexui.qt.QtCore import Qt,\
                                QSize
 
 from projexui.qt.QtGui import QSlider,\
-                              QPixmap,\
-                              QPainter
+                              QPixmap
 
+from projexui.xpainter import XPainter
 from projexui import resources
 
 class XRatingSlider(QSlider):
@@ -91,32 +91,32 @@ class XRatingSlider(QSlider):
         """
         self.setValue(self.valueAt(event.pos().x()))
     
-    def paintEvent( self, event ):
+    def paintEvent(self, event):
         """
         Paints the widget based on its values
         
         :param      event | <QPaintEvent>
         """
-        painter = QPainter(self)
-        count   = self.maximum() - self.minimum()
-        value   = self.value()
-        
-        w       = self.pixmapSize().width()
-        h       = self.pixmapSize().height()
-        x       = 2
-        y       = (self.height() - h) / 2
-        delta_x = (self.width() - 4 - (w * count - 1)) / (count - 1)
-        
-        full_pixmap  = self.fullPixmap().scaled(w, h)
-        empty_pixmap = self.emptyPixmap().scaled(w, h)
-        
-        for i in range(count):
-            if ( i < value ):
-                painter.drawPixmap(x, y, full_pixmap)
-            else:
-                painter.drawPixmap(x, y, empty_pixmap)
+        with XPainter(self) as painter:
+            count   = self.maximum() - self.minimum()
+            value   = self.value()
             
-            x += w + delta_x
+            w       = self.pixmapSize().width()
+            h       = self.pixmapSize().height()
+            x       = 2
+            y       = (self.height() - h) / 2
+            delta_x = (self.width() - 4 - (w * count - 1)) / (count - 1)
+            
+            full_pixmap  = self.fullPixmap().scaled(w, h)
+            empty_pixmap = self.emptyPixmap().scaled(w, h)
+            
+            for i in range(count):
+                if ( i < value ):
+                    painter.drawPixmap(x, y, full_pixmap)
+                else:
+                    painter.drawPixmap(x, y, empty_pixmap)
+                
+                x += w + delta_x
     
     def pixmapSize( self ):
         """

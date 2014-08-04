@@ -29,8 +29,9 @@ from projexui.qt.QtGui    import QGraphicsScene,\
                                  QLinearGradient,\
                                  QBrush,\
                                  QColor,\
-                                 QPixmap,\
-                                 QPainter
+                                 QPixmap
+
+from projexui.xpainter import XPainter
 
 class XGanttRenderOptions(object):
     def __init__(self, **kwds):
@@ -183,23 +184,23 @@ class XGanttScene(QGraphicsScene):
             tile_rect = QRectF(rect.x(), 0, rect.width(), height)
             pixmap = QPixmap(rect.width(), height)
             
-            painter = QPainter(pixmap)
-            painter.setBrush(QBrush(gradient))
-            painter.drawRect(tile_rect)
-            
-            rx = 0
-            ry = 0
-            rw = rect.width()
-            rh = rect.height()
-            
-            painter.setPen(borderColor)
-            painter.drawRect(rx, ry, rw, rh)
-            
-            painter.setPen(textColor)
-            painter.drawText(rx, ry, rw, rh - 2, text_align, label)
-            
-            tiles.append((tile_rect, pixmap))
-            painters.append((tile_rect, pixmap, painter))
+            with XPainter(pixmap) as painter:
+                painter.setBrush(QBrush(gradient))
+                painter.drawRect(tile_rect)
+                
+                rx = 0
+                ry = 0
+                rw = rect.width()
+                rh = rect.height()
+                
+                painter.setPen(borderColor)
+                painter.drawRect(rx, ry, rw, rh)
+                
+                painter.setPen(textColor)
+                painter.drawText(rx, ry, rw, rh - 2, text_align, label)
+                
+                tiles.append((tile_rect, pixmap))
+                painters.append((tile_rect, pixmap, painter))
         
         # add bottom labels
         for rect, label in self._labels:
@@ -211,11 +212,12 @@ class XGanttScene(QGraphicsScene):
                     rw = rect.width()
                     rh = rect.height()
                     
-                    painter.setPen(borderColor)
-                    painter.drawRect(rx, ry, rw, rh)
-                    
-                    painter.setPen(textColor)
-                    painter.drawText(rx, ry, rw, rh - 2, text_align, label)
+                    with painter:
+                        painter.setPen(borderColor)
+                        painter.drawRect(rx, ry, rw, rh)
+                        
+                        painter.setPen(textColor)
+                        painter.drawText(rx, ry, rw, rh - 2, text_align, label)
 
         self._tiles = tiles
     

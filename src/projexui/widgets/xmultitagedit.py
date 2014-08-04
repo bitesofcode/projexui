@@ -19,7 +19,6 @@ from projexui.qt.QtCore import QSize,\
 
 from projexui.qt.QtGui import QListWidgetItem,\
                               QItemDelegate,\
-                              QPainter,\
                               QFontMetrics,\
                               QPixmap,\
                               QLineEdit,\

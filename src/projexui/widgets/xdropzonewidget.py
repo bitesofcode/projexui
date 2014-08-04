@@ -12,6 +12,7 @@ __maintainer__      = 'Projex Software'
 __email__           = 'team@projexsoftware.com'
 
 from projexui.qt import QtCore, QtGui
+from projexui.xpainter import XPainter
 
 class XDropZoneRegion(QtGui.QLabel):
     def __init__(self, parent):
@@ -54,28 +55,27 @@ class XDropZoneRegion(QtGui.QLabel):
         return self._foreground
     
     def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
-        
-        if self.isHovered():
-            alpha = 120
-        else:
-            alpha = 30
-        
-        x = 0
-        y = 0
-        w = self.width() - 1
-        h = self.height() - 1
-        
-        clr = QtGui.QColor(self.background())
-        clr.setAlpha(alpha)
-        brush = QtGui.QBrush(clr)
-        painter.setPen(self.foreground())
-        painter.setBrush(brush)
-        
-        painter.drawRect(x, y, w, h)
-        painter.drawText(x, y, w, h,
-                         QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap,
-                         self.text())
+        with XPainter(self) as painter:
+            if self.isHovered():
+                alpha = 120
+            else:
+                alpha = 30
+            
+            x = 0
+            y = 0
+            w = self.width() - 1
+            h = self.height() - 1
+            
+            clr = QtGui.QColor(self.background())
+            clr.setAlpha(alpha)
+            brush = QtGui.QBrush(clr)
+            painter.setPen(self.foreground())
+            painter.setBrush(brush)
+            
+            painter.drawRect(x, y, w, h)
+            painter.drawText(x, y, w, h,
+                             QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap,
+                             self.text())
 
     def setBackground(self, background):
         """

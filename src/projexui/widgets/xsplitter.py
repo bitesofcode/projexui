@@ -25,10 +25,10 @@ from projexui.qt.QtGui import QSplitter,\
                               QSplitterHandle,\
                               QToolButton,\
                               QBoxLayout,\
-                              QLabel,\
-                              QPainter
+                              QLabel
 
 import projexui.resources
+from projexui.xpainter import XPainter
 
 class XSplitterHandle(QSplitterHandle):
     CollapseDirection = enum('After', 'Before')
@@ -215,14 +215,10 @@ class XSplitterHandle(QSplitterHandle):
                 y += spacing
             
         # draw the lines
-        painter = QPainter()
-        painter.begin(self)
-        
-        pal = self.palette()
-        painter.setPen(pal.color(pal.Window).darker(120))
-        painter.drawLines(lines)
-        
-        painter.end()
+        with XPainter(self) as painter:
+            pal = self.palette()
+            painter.setPen(pal.color(pal.Window).darker(120))
+            painter.drawLines(lines)
     
     def setOrientation( self, orientation ):
         """

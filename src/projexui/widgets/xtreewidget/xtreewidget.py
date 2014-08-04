@@ -36,6 +36,7 @@ from projexui import resources
 
 from projexui.xexporter import XExporter
 from projexui.widgets.xpopupwidget import XPopupWidget
+from projexui.xpainter import XPainter
 
 from .xtreewidgetdelegate import XTreeWidgetDelegate
 from .xtreewidgetitem import XTreeWidgetItem
@@ -1441,9 +1442,9 @@ class XTreeWidget(QtGui.QTreeWidget):
             clr     = self.hintColor()
             
             # paint the hint
-            painter = QtGui.QPainter(self.viewport())
-            painter.setPen(clr)
-            painter.drawText(rect, align | QtCore.Qt.TextWordWrap, text)
+            with XPainter(self.viewport()) as painter:
+                painter.setPen(clr)
+                painter.drawText(rect, align | QtCore.Qt.TextWordWrap, text)
     
     def resizeEvent(self, event):
         super(XTreeWidget, self).resizeEvent(event)

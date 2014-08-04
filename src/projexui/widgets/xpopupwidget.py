@@ -28,7 +28,6 @@ from projexui.qt.QtGui    import QAbstractButton,\
                                  QCursor,\
                                  QHBoxLayout,\
                                  QIcon,\
-                                 QPainter,\
                                  QPainterPath,\
                                  QPen,\
                                  QScrollArea,\
@@ -45,6 +44,7 @@ from projexui.qt.QtGui    import QAbstractButton,\
                                  QGraphicsDropShadowEffect,\
                                  QAbstractButton
 
+from projexui.xpainter import XPainter
 from projex.enum import enum
 from projex.decorators import deprecatedmethod
 
@@ -230,15 +230,13 @@ class XPopupWidget(QWidget):
         bitmap = QBitmap(self.width(), self.height())
         bitmap.fill(QColor('white'))
         
-        painter = QPainter()
-        painter.begin(bitmap)
-        painter.setRenderHint(QPainter.Antialiasing)
-        pen = QPen(QColor('black'))
-        pen.setWidthF(0.75)
-        painter.setPen(pen)
-        painter.setBrush(QColor('black'))
-        painter.drawPath(path)
-        painter.end()
+        with XPainter(bitmap) as painter:
+            painter.setRenderHint(XPainter.Antialiasing)
+            pen = QPen(QColor('black'))
+            pen.setWidthF(0.75)
+            painter.setPen(pen)
+            painter.setBrush(QColor('black'))
+            painter.drawPath(path)
         
         self.setMask(bitmap)
     
@@ -853,16 +851,13 @@ class XPopupWidget(QWidget):
         # setup the coloring options
         palette = self.palette()
         
-        painter = QPainter()
-        painter.begin(self)
-        
-        pen = QPen(palette.color(palette.Window).darker(130))
-        pen.setWidthF(1.75)
-        painter.setPen(pen)
-        painter.setRenderHint(painter.Antialiasing)
-        painter.setBrush(palette.color(palette.Window))
-        painter.drawPath(self.borderPath())
-        painter.end()
+        with XPainter(self) as painter:
+            pen = QPen(palette.color(palette.Window).darker(130))
+            pen.setWidthF(1.75)
+            painter.setPen(pen)
+            painter.setRenderHint(painter.Antialiasing)
+            painter.setBrush(palette.color(palette.Window))
+            painter.drawPath(self.borderPath())
     
     def popupPadding(self):
         """

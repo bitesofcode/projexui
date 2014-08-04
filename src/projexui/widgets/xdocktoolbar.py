@@ -22,17 +22,16 @@ from projexui.qt.QtCore import QRect,\
                                QTimer
 
 from projexui.qt.QtGui import QWidget,\
-                              QPainter,\
                               QBoxLayout,\
                               QLabel,\
                               QGraphicsDropShadowEffect,\
                               QAction,\
                               QCursor,\
                               QColor,\
-                              QPainter,\
                               QLinearGradient,\
                               QPainterPath
 
+from projex.xpainter import XPainter
 from projexui.xanimation import XObjectAnimation
 from projexui import resources
 from projex.enum import enum
@@ -410,37 +409,37 @@ class XDockToolbar(QWidget):
                 grad.setStart(0, 0)
                 grad.setFinalStop(w, 0)
         
-        painter = QPainter(self)
-        painter.fillRect(x, y, w, h, grad)
-        
-        # show the active action
-        action = self.selectedAction()
-        if action is not None and \
-           not self.currentAction() and \
-           not self._animating:
-            for lbl in self.actionLabels():
-                if lbl.action() != action:
-                    continue
-                
-                geom = lbl.geometry()
-                size = lbl.pixmapSize()
-                
-                if self.position() == self.Position.North:
-                    x = geom.left()
-                    y = 0
-                    w = geom.width()
-                    h = size.height() + geom.top() + 2
-                
-                elif self.position() == self.Position.East:
-                    x = 0
-                    y = geom.top()
-                    w = size.width() + geom.left() + 2
-                    h = geom.height()
-                
-                painter.setPen(QColor(140, 140, 40))
-                painter.setBrush(QColor(160, 160, 160))
-                painter.drawRect(x, y, w, h)
-                break
+        with XPainter(self) as painter:
+            painter.fillRect(x, y, w, h, grad)
+            
+            # show the active action
+            action = self.selectedAction()
+            if action is not None and \
+               not self.currentAction() and \
+               not self._animating:
+                for lbl in self.actionLabels():
+                    if lbl.action() != action:
+                        continue
+                    
+                    geom = lbl.geometry()
+                    size = lbl.pixmapSize()
+                    
+                    if self.position() == self.Position.North:
+                        x = geom.left()
+                        y = 0
+                        w = geom.width()
+                        h = size.height() + geom.top() + 2
+                    
+                    elif self.position() == self.Position.East:
+                        x = 0
+                        y = geom.top()
+                        w = size.width() + geom.left() + 2
+                        h = geom.height()
+                    
+                    painter.setPen(QColor(140, 140, 40))
+                    painter.setBrush(QColor(160, 160, 160))
+                    painter.drawRect(x, y, w, h)
+                    break
     
     def position(self):
         """

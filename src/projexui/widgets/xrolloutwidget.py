@@ -22,12 +22,12 @@ import datetime
 
 from projex.text import nativestring
 
+from projexui.xpainter import XPainter
 from projexui.qt import Signal
 from projexui.qt.QtCore import Qt
 from projexui.qt.QtGui import QFrame,\
                               QHBoxLayout,\
                               QLabel,\
-                              QPainter,\
                               QPalette,\
                               QScrollArea,\
                               QSizePolicy,\
@@ -38,6 +38,7 @@ from projexui.qt.QtGui import QFrame,\
                               QIcon,\
                               QPen
 
+from projexui.xpainter import XPainter
 import projexui.resources
 
 TITLE_STYLESHEET = """\
@@ -110,23 +111,19 @@ class XRolloutItem(QWidget):
         """
         super(XRolloutItem, self).paintEvent(event)
         
-        painter = QPainter()
-        painter.begin(self)
-        
-        w = self.width() - 3
-        h = self.height() - 3
-        
-        color = self.palette().color(QPalette.Midlight)
-        color = color.darker(180)
-        pen = QPen(color)
-        pen.setWidthF(0.5)
-        
-        painter.setPen(pen)
-        painter.setBrush(self.palette().color(QPalette.Midlight))
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.drawRoundedRect(1, 1, w, h, 10, 10)
-        
-        painter.end()
+        with XPainter(self) as painter:
+            w = self.width() - 3
+            h = self.height() - 3
+            
+            color = self.palette().color(QPalette.Midlight)
+            color = color.darker(180)
+            pen = QPen(color)
+            pen.setWidthF(0.5)
+            
+            painter.setPen(pen)
+            painter.setBrush(self.palette().color(QPalette.Midlight))
+            painter.setRenderHint(XPainter.Antialiasing)
+            painter.drawRoundedRect(1, 1, w, h, 10, 10)
     
     def isExpanded( self ):
         """

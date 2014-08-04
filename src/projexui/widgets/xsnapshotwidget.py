@@ -24,7 +24,6 @@ from projexui.qt.QtGui  import QWidget,\
                                QPen,\
                                QColor,\
                                QBrush,\
-                               QPainter,\
                                QPixmap,\
                                QRegion
 
@@ -134,13 +133,13 @@ class XSnapshotWidget(QWidget):
         """
         pen = QPen(Qt.DashLine)
         pen.setColor(QColor('red'))
-        painter = QPainter(self)
-        painter.setPen(pen)
-        clr = QColor('black')
-        clr.setAlpha(100)
-        painter.setBrush(clr)
-        
-        painter.drawRect(self._region)
+        with XPainter(self) as painter:
+            painter.setPen(pen)
+            clr = QColor('black')
+            clr.setAlpha(100)
+            painter.setBrush(clr)
+            
+            painter.drawRect(self._region)
     
     def reject(self):
         """

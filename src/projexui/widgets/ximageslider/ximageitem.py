@@ -13,7 +13,6 @@ from projexui.qt.QtGui import QGraphicsPixmapItem,\
                               QLinearGradient,\
                               QPixmap,\
                               QImage,\
-                              QPainter,\
                               QBitmap,\
                               QApplication,\
                               QGraphicsDropShadowEffect

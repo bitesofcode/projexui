@@ -8,6 +8,7 @@ __credits__     = []
 __copyright__   = 'Copyright (c) 2011, Projex Software'
 
 from xqt import QtCore, QtGui
+from projexui.xpainter import XPainter
 
 class XNumberArea(QtGui.QWidget):
     def __init__(self, editor):
@@ -25,31 +26,31 @@ class XNumberArea(QtGui.QWidget):
         return self._codeEditor
 
     def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
-        painter.fillRect(event.rect(), QtGui.QColor('lightGray'))
-        
-        edit = self.codeEditor()
-        block = edit.firstVisibleBlock()
-        blockNumber = block.blockNumber()
-        top = edit.blockBoundingGeometry(block).translated(edit.contentOffset()).top()
-        bottom = top + edit.blockBoundingRect(block).height()
-        textHeight = edit.fontMetrics().height()
-
-        painter.setFont(self.font())
-        painter.setPen(QtGui.QColor('black'))
-        while block.isValid() and top <= event.rect().bottom():
-            if block.isVisible() and bottom >= event.rect().top():
-                painter.drawText(0,
-                                 top,
-                                 self.width() - 6,
-                                 textHeight,
-                                 QtCore.Qt.AlignRight,
-                                 str(blockNumber + 1))
-
-            block = block.next()
-            top = bottom
+        with XPainter(self) as painter:
+            painter.fillRect(event.rect(), QtGui.QColor('lightGray'))
+            
+            edit = self.codeEditor()
+            block = edit.firstVisibleBlock()
+            blockNumber = block.blockNumber()
+            top = edit.blockBoundingGeometry(block).translated(edit.contentOffset()).top()
             bottom = top + edit.blockBoundingRect(block).height()
-            blockNumber += 1
+            textHeight = edit.fontMetrics().height()
+
+            painter.setFont(self.font())
+            painter.setPen(QtGui.QColor('black'))
+            while block.isValid() and top <= event.rect().bottom():
+                if block.isVisible() and bottom >= event.rect().top():
+                    painter.drawText(0,
+                                     top,
+                                     self.width() - 6,
+                                     textHeight,
+                                     QtCore.Qt.AlignRight,
+                                     str(blockNumber + 1))
+
+                block = block.next()
+                top = bottom
+                bottom = top + edit.blockBoundingRect(block).height()
+                blockNumber += 1
 
     def sizeHint(self):
         return QtCore.QSize(self.codeEditor().numberAreaWidth(), 0)
