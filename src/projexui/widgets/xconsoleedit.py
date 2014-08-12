@@ -378,6 +378,9 @@ class XConsoleEdit(XLoggerWidget):
         
         :return     <variant>
         """
+        if not command.strip():
+            return self.waitForInput()
+        
         # store the current block
         self._history.append(command)
         self._currentHistoryIndex = len(self._history)
@@ -588,14 +591,11 @@ class XConsoleEdit(XLoggerWidget):
         cursor   = self.textCursor()
         text     = projex.text.nativestring(cursor.block().text())
         position = cursor.positionInBlock() - 1
-        symbol   = ''
         
         if not text:
             return (None, '')
         
-        if text[position] in ('.', '('):
-            position -= 1
-        
+        symbol   = ''
         for match in re.finditer('[\w\.]+', text):
             if match.start() <= position <= match.end():
                 symbol = match.group()
@@ -604,25 +604,19 @@ class XConsoleEdit(XLoggerWidget):
         if not symbol:
             return (None, '')
         
-        # try to evaluate the full object
-        if '.' in symbol:
+        parts = symbol.split('.')
+        if len(parts) == 1:
+            return (self.scope(), parts[0])
+        
+        part = parts[0]
+        obj = self.scope().get(part)
+        for part in parts[1:-1]:
             try:
-                return (eval(symbol, self.scope(), self.scope()), '')
-            except:
-                pass
-            
-            # try to evaluate the remainder object
-            symbol, _, remain = symbol.rpartition('.')
-            if symbol:
-                try:
-                    obj = eval(symbol, self.scope(), self.scope())
-                    return (obj, remain)
-                except:
-                    return (None, '')
-            else:
+                obj = getattr(obj, part)
+            except AttributeError:
                 return (None, '')
-        else:
-            return (self.scope(), symbol)
+        
+        return (obj, parts[-1])
 
     def restoreSettings(self, settings):
         hist = []
@@ -750,16 +744,15 @@ class XConsoleEdit(XLoggerWidget):
         cursor = self.textCursor()
         point  = QPoint(rect.left(), rect.top() + 18)
         
-        if obj == self._scope:
+        # compare the ids since some things might overload the __eq__
+        # comparator
+        if id(obj) == id(self._scope):
             o_keys = obj.keys()
-        else:
-            try:
-                o_keys = obj.__dir__()
-            except (AttributeError, TypeError):
-                o_keys = dir(obj)
+        elif obj is not None:
+            o_keys = dir(obj)
         
         keys = [key for key in sorted(o_keys) if not key.startswith('_')]
-        if obj == self.scope():
+        if id(obj) == id(self._scope):
             if not remain:
                 return False
             else:

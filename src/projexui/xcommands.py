@@ -56,17 +56,18 @@ def ancestor(qobject, classType):
     is_class = True
     while parent:
         if type(parent).__name__ == classType:
-            break
+            return parent
         
         if is_class:
             try:
-                if isinstance(parent, classType): break
+                if isinstance(parent, classType):
+                    return parent
             except TypeError:
                 is_class = False
         
         parent = parent.parent()
     
-    return parent
+    return None
 
 def buildResourceFile(rscpath, outpath=''):
     """

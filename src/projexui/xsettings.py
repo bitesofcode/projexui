@@ -375,10 +375,15 @@ class YamlFormat(XSettingsFormat):
             data = f.read()
         
         try:
-            self._root = yaml.load(data)
-            self._stack = [self._root]
+            root = yaml.load(data)
         except StandardError:
-            self.clear()
+            root = None
+        
+        if root is None:
+            root = {}
+        
+        self._root = root
+        self._stack = [self._root]
         
         return len(self._root) != 0
 
@@ -434,7 +439,8 @@ class YamlFormat(XSettingsFormat):
         
         :return     <variant>
         """
-        return self._stack[-1].get(key, default)
+        curr = self._stack[-1]
+        return curr.get(key, default)
 
 #----------------------------------------------------------------------
 
