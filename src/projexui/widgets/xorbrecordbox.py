@@ -18,7 +18,7 @@ __email__           = 'team@projexsoftware.com'
 
 import logging
 
-from projex.text import nativestring
+from projex.text import nativestring as nstr
 
 from projexui.qt import Signal,\
                         Property,\
@@ -76,7 +76,7 @@ class XOrbRecordBox(XComboBox):
         self._order             = None
         self._query             = None
         self._iconMapper        = None
-        self._labelMapper       = str
+        self._labelMapper       = nstr
         self._required          = True
         self._loaded            = False
         self._showTreePopup     = False
@@ -299,7 +299,7 @@ class XOrbRecordBox(XComboBox):
         if data.hasFormat('application/x-orb-table') and \
            data.hasFormat('application/x-orb-query'):
             tableName = self.tableTypeName()
-            if nativestring(data.data('application/x-orb-table')) == tableName:
+            if nstr(data.data('application/x-orb-table')) == tableName:
                 event.acceptProposedAction()
                 return
         elif data.hasFormat('application/x-orb-records'):
@@ -318,7 +318,7 @@ class XOrbRecordBox(XComboBox):
         if data.hasFormat('application/x-orb-table') and \
            data.hasFormat('application/x-orb-query'):
             tableName = self.tableTypeName()
-            if nativestring(data.data('application/x-orb-table')) == tableName:
+            if nstr(data.data('application/x-orb-table')) == tableName:
                 event.acceptProposedAction()
                 return
         elif data.hasFormat('application/x-orb-records'):
@@ -338,8 +338,8 @@ class XOrbRecordBox(XComboBox):
         if data.hasFormat('application/x-orb-table') and \
            data.hasFormat('application/x-orb-query'):
             tableName = self.tableTypeName()
-            if nativestring(data.data('application/x-orb-table')) == tableName:
-                data = nativestring(data.data('application/x-orb-query'))
+            if nstr(data.data('application/x-orb-table')) == tableName:
+                data = nstr(data.data('application/x-orb-query'))
                 query = Q.fromXmlString(data)
                 self.setQuery(query)
                 return
@@ -914,7 +914,7 @@ class XOrbRecordBox(XComboBox):
         
         :param    index | <str>
         """
-        self._tableLookupIndex = nativestring(index)
+        self._tableLookupIndex = nstr(index)
     
     def setTableType( self, tableType ):
         """
@@ -935,7 +935,7 @@ class XOrbRecordBox(XComboBox):
         
         :param      name | <str>
         """
-        self._tableTypeName = nativestring(name)
+        self._tableTypeName = nstr(name)
         self._tableType = None
     
     def setThreadEnabled(self, state):
@@ -1051,7 +1051,7 @@ class XOrbRecordBox(XComboBox):
         """
         if not self._tableType:
             if self._tableTypeName:
-                self._tableType = Orb.instance().model(nativestring(self._tableTypeName))
+                self._tableType = Orb.instance().model(nstr(self._tableTypeName))
             
         return self._tableType
     
