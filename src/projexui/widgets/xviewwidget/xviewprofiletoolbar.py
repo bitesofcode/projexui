@@ -478,7 +478,7 @@ class XViewProfileToolBar(XToolBar):
         self.blockSignals(blocked)
         
         # update the current profile
-        if profile == self._currentProfile:
+        if profile == self._currentProfile and not self._viewWidget.isEmpty():
             return
         
         self._currentProfile = profile

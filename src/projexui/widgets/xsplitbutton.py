@@ -17,8 +17,8 @@ __email__           = 'team@projexsoftware.com'
 
 from projex.text import nativestring
 
-from projexui.qt       import Signal, Property, QStringList
-from projexui.qt.QtCore import QSize
+from projexui.qt       import Signal, Property
+from projexui.qt.QtCore import QSize, QStringList
 from projexui.qt.QtGui import QAction,\
                               QActionGroup,\
                               QBoxLayout,\

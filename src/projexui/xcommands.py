@@ -97,7 +97,7 @@ def buildResourceFile(rscpath, outpath=''):
         used_pyqt = True
     except StandardError:
         used_pyqt = False
-    
+
     if not used_pyqt:
         # make sure it is not outdated
         try:

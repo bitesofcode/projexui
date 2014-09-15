@@ -36,7 +36,7 @@ projex.requires('orb')
 
 import projexui
 
-from orb import PRIMARY_FIELD, Query as Q
+from orb import Query as Q
 
 logger = logging.getLogger(__name__)
 
@@ -188,9 +188,9 @@ class XOrbRecordEdit(QWidget):
                 # check for uniqueness
                 query        = Q(column.name()) == value
                 if ( record.isRecord() ):
-                    query   &= Q(PRIMARY_FIELD) != record
+                    query   &= Q(self._model) != record
                 
-                columns  = [PRIMARY_FIELD]
+                columns  = self._model.schema().primaryColumns()
                 result   = self._model.select(columns = columns, where = query)
                 
                 if ( result.total() ):
