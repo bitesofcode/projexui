@@ -59,9 +59,6 @@ class XOrbRecordItem( XTreeWidgetItem ):
             tree._recordMapping[record] = weakref.ref(self)
         except AttributeError:
             pass
-        
-        if self.hasRecords():
-            self.setChildIndicatorPolicy(self.ShowIndicator)
     
     def addRecordState( self, state ):
         """
