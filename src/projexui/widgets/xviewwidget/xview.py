@@ -244,11 +244,11 @@ class XView(QWidget):
         if not self.canClose():
             event.ignore()
             return
-        
+
         elif not self.isViewSingleton():
             super(XView, self).closeEvent(event)
-            QTimer.singleShot(100, self.deleteLater)
-        
+            QTimer.singleShot(0, self.deleteLater)
+
         else:
             super(XView, self).closeEvent(event)
     
@@ -315,8 +315,7 @@ class XView(QWidget):
         
         if not self.signalsBlocked():
             self.visibleStateChanged.emit(False)
-            
-            QTimer.singleShot(15, self.hidden.emit)
+            QTimer.singleShot(0, self.hidden.emit)
     
     def initialize(self, force=False):
         """
@@ -620,8 +619,7 @@ class XView(QWidget):
         # signal will be emitted
         elif not self.signalsBlocked():
             self.visibleStateChanged.emit(True)
-            
-            QTimer.singleShot(15, self.shown.emit)
+            QTimer.singleShot(0, self.shown.emit)
             
     def signalPolicy(self):
         """
@@ -746,7 +744,7 @@ class XView(QWidget):
         
         if singleton is not None:
             setattr(cls, singleton_key, None)
-            
+
             singleton.close()
             singleton.deleteLater()
     
