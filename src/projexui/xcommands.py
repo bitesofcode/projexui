@@ -338,7 +338,7 @@ def localizeShortcuts(widget):
     for action in widget.findChildren(QtGui.QAction):
         action.setShortcutContext(QtCore.Qt.WidgetWithChildrenShortcut)
 
-def loadUi(modulefile, inst, uifile=None, theme='default'):
+def loadUi(modulefile, inst, uifile=None, theme='default', className=None):
     """
     Load the ui file based on the module file location and the inputed class.
     
@@ -348,6 +348,9 @@ def loadUi(modulefile, inst, uifile=None, theme='default'):
     
     :return     <QWidget>
     """
+    if className is None:
+        className = inst.__class__.__name__
+
     import_qt(globals())
     
     currpath = QtCore.QDir.currentPath()
@@ -357,7 +360,7 @@ def loadUi(modulefile, inst, uifile=None, theme='default'):
     if USE_COMPILED:
         wrapper = QT_WRAPPER.lower()
         root_module, _, _ = inst.__module__.rpartition('.')
-        basename = inst.__class__.__name__.lower()
+        basename = className.lower()
         
         modname_a = '{0}.ui.{1}_{2}_{3}_ui'.format(root_module, basename, theme, wrapper)
         modname_b = '{0}.ui.{1}_{2}_ui'.format(root_module, basename, wrapper)
@@ -377,7 +380,7 @@ def loadUi(modulefile, inst, uifile=None, theme='default'):
         # successfully loaded a module
         if module:
             # load the module information
-            cls = getattr(module, 'Ui_%s' % inst.__class__.__name__, None)
+            cls = getattr(module, 'Ui_%s' % className, None)
             if not cls:
                 for key in module.__dict__.keys():
                     if key.startswith('Ui_'):
@@ -392,7 +395,7 @@ def loadUi(modulefile, inst, uifile=None, theme='default'):
     
     if not widget:
         if not uifile:
-            uifile = uiFile(modulefile, inst, theme)
+            uifile = uiFile(modulefile, inst, theme, className=className)
         
         # normalize the path
         uifile = os.path.normpath(uifile)
@@ -594,7 +597,7 @@ def testWidget( widgetType ):
     
     return widget
 
-def uiFile(modulefile, inst, theme=''):
+def uiFile(modulefile, inst, theme='', className=None):
     """
     Returns the ui file for the given instance and module file.
     
@@ -603,11 +606,14 @@ def uiFile(modulefile, inst, theme=''):
     
     :return     <str>
     """
+    if className is None:
+        className = inst.__class__.__name__
+
     # use a module's name vs. filepath
     if modulefile in sys.modules:
         modulefile = sys.modules[modulefile].__file__
     
-    clsname  = inst.__class__.__name__.lower()
+    clsname  = className.lower()
     basepath = os.path.dirname(nativestring(modulefile))
     
     if theme:

@@ -763,6 +763,15 @@ class XView(QWidget):
         return parent.findChildren(cls)
 
     @classmethod
+    def isViewAbstract(cls):
+        """
+        Returns whether or not this view is a purely abstract view or not.
+
+        :return     <bool>
+        """
+        return getattr(cls, '_{0}__viewAbstract'.format(cls.__name__), False)
+
+    @classmethod
     def isViewSingleton(cls):
         return getattr(cls, '_{0}__viewSingleton'.format(cls.__name__), False)
     
@@ -839,7 +848,16 @@ class XView(QWidget):
                     settings | <QSettings>
         """
         pass
-    
+
+    @classmethod
+    def setViewAbstract(cls, state):
+        """
+        Sets whether or not this view is used only as an abstract class.
+
+        :param      state | <bool>
+        """
+        setattr(cls, '_{0}__viewAbstract'.format(cls.__name__), state)
+
     @classmethod
     def setViewGroup(cls, grp):
         setattr(cls, '_{0}__viewGroup'.format(cls.__name__), grp)
@@ -942,7 +960,12 @@ class XView(QWidget):
         :return     <subclass of XView> || None
         """
         loc = nativestring(location)
-        return XView._registry.get(loc, {}).get(viewName, None)
+        view = XView._registry.get(loc, {}).get(viewName, None)
+        if not view:
+            for view in XView._registry.get(nativestring(location), {}).values():
+                if view.__name__ == viewName:
+                    return view
+        return view
     
     @staticmethod
     def registeredViews(location='Central'):
@@ -954,7 +977,7 @@ class XView(QWidget):
         
         :return     [<subclass of XView>, ..]
         """
-        return XView._registry.get(nativestring(location), {}).values()
+        return [view for view in XView._registry.get(nativestring(location), {}).values() if not view.isViewAbstract()]
         
     @staticmethod
     def registerView(viewType, location='Central'):

@@ -291,7 +291,7 @@ class XViewProfileToolBar(XToolBar):
         """
         return len(self._profileGroup.actions()) == 0
     
-    def loadString(self, profilestr, merge=False):
+    def loadString(self, profilestr, merge=False, loadProfile=True):
         """
         Loads the information for this toolbar from the inputed string.
         
@@ -313,7 +313,7 @@ class XViewProfileToolBar(XToolBar):
                 self.removeProfile(prof.name(), silent=True)
             
             self.addProfile(prof)
-        
+
         self.setCurrentProfile(xtoolbar.get('current'))
         
         self.blockSignals(False)
@@ -346,7 +346,7 @@ class XViewProfileToolBar(XToolBar):
         """
         return self._profileText
     
-    def restoreSettings(self, settings, merge=False):
+    def restoreSettings(self, settings, merge=False, loadProfile=True):
         """
         Restores this profile from settings.
         
@@ -356,7 +356,7 @@ class XViewProfileToolBar(XToolBar):
         if not value:
             return
         
-        self.loadString(value, merge)
+        self.loadString(value, merge, loadProfile=loadProfile)
     
     @Slot(PyObject)
     def removeProfile(self, profile, silent=False):
@@ -482,7 +482,7 @@ class XViewProfileToolBar(XToolBar):
             return
         
         self._currentProfile = profile
-        if self._viewWidget and profile:
+        if self._viewWidget and profile and not blocked:
             self._viewWidget.restoreProfile(profile)
         
         if not blocked:
