@@ -363,6 +363,9 @@
     <file alias="mac.png">default\img\os\mac.png</file>
     <file alias="win.png">default\img\os\win.png</file>
   </qresource>
+  <qresource prefix="default/img/overlay">
+    <file alias="close.png">default\img\overlay\close.png</file>
+  </qresource>
   <qresource prefix="default/img/query">
     <file alias="add.png">default\img\query\add.png</file>
     <file alias="back.png">default\img\query\back.png</file>
