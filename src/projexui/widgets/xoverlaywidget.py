@@ -10,6 +10,7 @@ class XOverlayWidget(QtGui.QWidget):
         super(XOverlayWidget, self).__init__(parent)
 
         # define custom properties
+        self._centralWidget = None
         self._result = None
         self._closable = True
         self._closeButton = XToolButton(self)
@@ -42,6 +43,13 @@ class XOverlayWidget(QtGui.QWidget):
         self.close()
         self.setResult(1)
         self.finished.emit(1)
+
+    def adjustSize(self, size):
+        """
+        Adjusts the size of this widget as the parent resizes.
+        """
+        self.move(0, 0)
+        self.resize(size)
 
     def centralWidget(self):
         """
@@ -81,8 +89,7 @@ class XOverlayWidget(QtGui.QWidget):
         :return     <bool>
         """
         if object == self.parent() and event.type() == QtCore.QEvent.Resize:
-            self.move(0, 0)
-            self.resize(event.size())
+            self.adjustSize(event.size())
         elif event.type() == QtCore.QEvent.Close:
             self.setResult(0)
         return False
