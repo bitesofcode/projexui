@@ -7,20 +7,24 @@ from xqt import QtCore, QtGui
 
 from .xoverlaywidget import XOverlayWidget
 
-class XOverlayWizardPage(QtGui.QWidget):
+class XOverlayWizardPage(QtGui.QFrame):
     completeChanged = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(XOverlayWizardPage, self).__init__(parent)
 
+        self.setFrameShape(QtGui.QFrame.Box)
+
         # define custom properties
         self._commitPage = False
         self._finalPage = False
+        self._retryEnabled = False
 
         # create the title information
         font = self.font()
         font.setBold(True)
-        font.setPointSize(font.pointSize() + 2)
+        base_size = font.pointSize()
+        font.setPointSize(base_size + 4)
 
         # set the palette coloring
         pal = self.palette()
@@ -31,6 +35,7 @@ class XOverlayWizardPage(QtGui.QWidget):
         self._titleLabel = QtGui.QLabel('', self)
         self._titleLabel.setFont(font)
         self._titleLabel.setPalette(pal)
+        font.setPointSize(base_size + 2)
         self._subTitleLabel = QtGui.QLabel('', self)
         self._subTitleLabel.setPalette(pal)
 
@@ -98,6 +103,14 @@ class XOverlayWizardPage(QtGui.QWidget):
         """
         return self._finalPage or self.nextId() == -1
 
+    def isRetryEnabled(self):
+        """
+        Returns whether or not this page can retry its methods.
+
+        :return     <bool>
+        """
+        return self._retryEnabled
+
     def initializePage(self):
         """
         Performs any initialization operations that are necessary for this page.
@@ -154,6 +167,14 @@ class XOverlayWizardPage(QtGui.QWidget):
         self._subTitleLabel.setText(title)
         self._subTitleLabel.adjustSize()
         self.adjustMargins()
+
+    def setRetryEnabled(self, state=True):
+        """
+        Sets whether or not this page has retrying allowed.
+
+        :param      state | <bool>
+        """
+        self._retryEnabled = state
 
     def setTitle(self, title):
         """
@@ -230,6 +251,7 @@ class XOverlayWizard(XOverlayWidget):
         self._buttons = {}
         self._fields = {}
         self._navigation = []
+        self._animationSpeed = 350
 
         # create the buttons
         self._buttons[self.WizardButton.HelpButton] = QtGui.QPushButton(self.tr('Help'), self)
@@ -243,8 +265,10 @@ class XOverlayWizard(XOverlayWidget):
         # don't show any buttons by default
         pal = self.palette()
         for which, btn in self._buttons.items():
-            pal.setColor(pal.Button, QtGui.QColor(self.WizardButtonColors[which]))
-            pal.setColor(pal.ButtonText, QtGui.QColor('white'))
+            pal.setColor(pal.Active, pal.Button, QtGui.QColor(self.WizardButtonColors[which]))
+            pal.setColor(pal.Active, pal.ButtonText, QtGui.QColor('white'))
+            pal.setColor(pal.Inactive, pal.Button, QtGui.QColor(self.WizardButtonColors[which]))
+            pal.setColor(pal.Inactive, pal.ButtonText, QtGui.QColor('white'))
             btn.setPalette(pal)
             btn.setFixedSize(QtCore.QSize(120, 30))
             btn.hide()
@@ -266,19 +290,15 @@ class XOverlayWizard(XOverlayWidget):
         """
         self.setPage(len(self._pages), page)
 
-    def adjustSize(self, size):
+    def adjustSize(self):
         """
         Adjusts the size of this wizard and its page contents to the inputed size.
 
         :param      size | <QtCore.QSize>
         """
-        super(XOverlayWizard, self).adjustSize(size)
-        self.adjustPage()
+        super(XOverlayWizard, self).adjustSize()
 
-    def adjustPage(self):
-        """
-        Adjusts the page layout composition for this wizard.
-        """
+        # adjust the page size
         page_size = self.pageSize()
 
         # resize the current page to the inputed size
@@ -286,12 +306,13 @@ class XOverlayWizard(XOverlayWidget):
         y = (self.height() - page_size.height()) / 2
         btn_height = max([btn.height() for btn in self._buttons.values()])
 
+        curr_page = self.currentPage()
         for page in self._pages.values():
+            if page == curr_page:
+                page.move(x, y)
+            else:
+                page.move(self.width(), y)
             page.resize(page_size.width(), page_size.height() - btn_height - 6)
-
-        page = self.currentPage()
-        if page:
-            page.move(x, y)
 
         # move the left most buttons
         y += page_size.height() - btn_height
@@ -313,24 +334,31 @@ class XOverlayWizard(XOverlayWidget):
             btn.raise_()
             x -= btn.width() + 6
 
+    def animationSpeed(self):
+        """
+        Returns the speed that the pages should animate in/out in milliseconds.
+
+        :return     <int>
+        """
+        return self._animationSpeed
+
     def back(self):
         """
         Goes to the previous page for this wizard.
         """
         try:
-            pageId = self._navigation[self._navigation.index(self.currentId())-1]
+            pageId = self._navigation[-2]
             last_page = self.page(pageId)
         except IndexError:
             return
 
-        curr_page = self.currentPage()
+        curr_page = self.page(self._navigation.pop())
         if not (last_page and curr_page):
             return
 
         self._currentId = pageId
 
         y = curr_page.y()
-
         last_page.move(-last_page.width(), y)
         last_page.show()
 
@@ -340,7 +368,7 @@ class XOverlayWizard(XOverlayWidget):
         anim_in.setPropertyName('pos')
         anim_in.setStartValue(last_page.pos())
         anim_in.setEndValue(curr_page.pos())
-        anim_in.setDuration(500)
+        anim_in.setDuration(self.animationSpeed())
         anim_in.setEasingCurve(QtCore.QEasingCurve.Linear)
 
         # animate the current page out
@@ -349,7 +377,7 @@ class XOverlayWizard(XOverlayWidget):
         anim_out.setPropertyName('pos')
         anim_out.setStartValue(curr_page.pos())
         anim_out.setEndValue(QtCore.QPoint(self.width()+curr_page.width(), y))
-        anim_out.setDuration(500)
+        anim_out.setDuration(self.animationSpeed())
         anim_out.setEasingCurve(QtCore.QEasingCurve.Linear)
 
         # create the anim group
@@ -358,16 +386,17 @@ class XOverlayWizard(XOverlayWidget):
         anim_grp.addAnimation(anim_out)
         anim_grp.finished.connect(curr_page.hide)
         anim_grp.finished.connect(anim_grp.deleteLater)
-        anim_grp.start()
-
-        self.currentIdChanged.emit(pageId)
 
         # update the button states
         self._buttons[self.WizardButton.BackButton].setVisible(self.canGoBack())
         self._buttons[self.WizardButton.NextButton].setVisible(True)
+        self._buttons[self.WizardButton.RetryButton].setVisible(self.canRetry())
         self._buttons[self.WizardButton.CommitButton].setVisible(last_page.isCommitPage())
         self._buttons[self.WizardButton.FinishButton].setVisible(last_page.isFinalPage())
-        self.adjustPage()
+
+        self.adjustSize()
+        self.currentIdChanged.emit(pageId)
+        anim_grp.start()
 
     def button(self, which):
         """
@@ -418,6 +447,17 @@ class XOverlayWizard(XOverlayWidget):
         except AttributeError:
             return False
 
+    def canRetry(self):
+        """
+        Returns whether or not this wizard can retry the current page.
+
+        :return     <bool>
+        """
+        try:
+            return self.currentPage().retryEnabled()
+        except AttributeError:
+            return False
+
     def commit(self):
         """
         Commits the current page information.
@@ -446,15 +486,16 @@ class XOverlayWizard(XOverlayWidget):
         except KeyError:
             return None
 
-    def field(self, name):
+    def field(self, name, default=None):
         """
         Returns the value for the inputed field property for this wizard.
 
         :param      name | <str>
+                    default | <variant>
 
         :return     <variant>
         """
-        return self._fields.get(name)
+        return self._fields.get(name, default)
 
     def fixedPageSize(self):
         """
@@ -503,13 +544,10 @@ class XOverlayWizard(XOverlayWidget):
             return
 
         self._currentId = pageId
-        if not pageId in self._navigation:
-            self._navigation.append(pageId)
+        self._navigation.append(pageId)
 
         y = curr_page.y()
-
-        next_page.move(self.width()+next_page.width(), y)
-        next_page.show()
+        next_page.move(self.width(), y)
 
         # animate the last page in
         anim_in = QtCore.QPropertyAnimation(self)
@@ -517,7 +555,7 @@ class XOverlayWizard(XOverlayWidget):
         anim_in.setPropertyName('pos')
         anim_in.setStartValue(curr_page.pos())
         anim_in.setEndValue(QtCore.QPoint(-curr_page.width(), y))
-        anim_in.setDuration(500)
+        anim_in.setDuration(self.animationSpeed())
         anim_in.setEasingCurve(QtCore.QEasingCurve.Linear)
 
         # animate the current page out
@@ -526,7 +564,7 @@ class XOverlayWizard(XOverlayWidget):
         anim_out.setPropertyName('pos')
         anim_out.setStartValue(next_page.pos())
         anim_out.setEndValue(curr_page.pos())
-        anim_out.setDuration(500)
+        anim_out.setDuration(self.animationSpeed())
         anim_out.setEasingCurve(QtCore.QEasingCurve.Linear)
 
         # create the anim group
@@ -535,17 +573,21 @@ class XOverlayWizard(XOverlayWidget):
         anim_grp.addAnimation(anim_out)
         anim_grp.finished.connect(curr_page.hide)
         anim_grp.finished.connect(anim_grp.deleteLater)
-        anim_grp.start()
 
-        self.currentIdChanged.emit(pageId)
-        next_page.initializePage()
+        next_page.show()
 
         # update the button states
         self._buttons[self.WizardButton.BackButton].setVisible(True)
         self._buttons[self.WizardButton.NextButton].setVisible(self.canGoForward())
+        self._buttons[self.WizardButton.RetryButton].setVisible(self.canRetry())
         self._buttons[self.WizardButton.CommitButton].setVisible(next_page.isCommitPage())
         self._buttons[self.WizardButton.FinishButton].setVisible(next_page.isFinalPage())
-        self.adjustPage()
+        self.adjustSize()
+
+        # initialize the new page
+        self.currentIdChanged.emit(pageId)
+        next_page.initializePage()
+        anim_grp.start()
 
     def page(self, pageId):
         """
@@ -589,7 +631,7 @@ class XOverlayWizard(XOverlayWidget):
         Executes this wizard within the system.
         """
         self.show()
-        self.adjustSize(self.size())
+        self.adjustSize()
         self.restart()
 
     def restart(self):
@@ -622,19 +664,20 @@ class XOverlayWizard(XOverlayWidget):
         anim_out.setPropertyName('pos')
         anim_out.setStartValue(first_page.pos())
         anim_out.setEndValue(QtCore.QPoint(x, y))
-        anim_out.setDuration(500)
+        anim_out.setDuration(self.animationSpeed())
         anim_out.setEasingCurve(QtCore.QEasingCurve.Linear)
         anim_out.finished.connect(anim_out.deleteLater)
-        anim_out.start()
-
-        self.currentIdChanged.emit(pageId)
 
         # update the button states
         self._buttons[self.WizardButton.BackButton].setVisible(False)
         self._buttons[self.WizardButton.NextButton].setVisible(self.canGoForward())
         self._buttons[self.WizardButton.CommitButton].setVisible(first_page.isCommitPage())
         self._buttons[self.WizardButton.FinishButton].setVisible(first_page.isFinalPage())
-        self.adjustPage()
+        self.adjustSize()
+
+        first_page.initializePage()
+        self.currentIdChanged.emit(pageId)
+        anim_out.start()
 
     def removePage(self, pageId):
         """
@@ -656,6 +699,14 @@ class XOverlayWizard(XOverlayWidget):
             self.currentPage().initializePage()
         except AttributeError:
             pass
+
+    def setAnimationSpeed(self, speed):
+        """
+        Sets the speed that the pages should animate in/out in milliseconds.
+
+        :param      speed | <int> | milliseconds
+        """
+        self._animationSpeed = speed
 
     def setButton(self, which, button):
         """
@@ -702,7 +753,7 @@ class XOverlayWizard(XOverlayWidget):
         :param      size | <QtCore.QSize>
         """
         self._fixedPageSize = size
-        self.adjustPage()
+        self.adjustSize()
 
     def setMinimumPageSize(self, size):
         """
@@ -713,7 +764,7 @@ class XOverlayWizard(XOverlayWidget):
         :param      size | <QtCore.QSize>
         """
         self._minimumPageSize = size
-        self.adjustPage()
+        self.adjustSize()
 
     def setMaximumPageSize(self, size):
         """
@@ -724,7 +775,7 @@ class XOverlayWizard(XOverlayWidget):
         :param      size | <QtCore.QSize>
         """
         self._maximumPageSize = size
-        self.adjustPage()
+        self.adjustSize()
 
     def setPage(self, pageId, page):
         """

@@ -21,8 +21,8 @@ class XOverlayWidget(QtGui.QWidget):
 
         # create the coloring for the overlay
         palette = self.palette()
-        clr = QtGui.QColor('black')
-        clr.setAlpha(140)
+        clr = QtGui.QColor('#333333')
+        clr.setAlpha(220)
         palette.setColor(palette.Window, clr)
         self.setPalette(palette)
         self.setAutoFillBackground(True)
@@ -44,12 +44,18 @@ class XOverlayWidget(QtGui.QWidget):
         self.setResult(1)
         self.finished.emit(1)
 
-    def adjustSize(self, size):
+    def adjustSize(self):
         """
         Adjusts the size of this widget as the parent resizes.
         """
-        self.move(0, 0)
-        self.resize(size)
+        # adjust the close button
+        self._closeButton.move(self.width() - 38, 6)
+
+        # adjust the central widget
+        widget = self.centralWidget()
+        if widget is not None:
+            center = self.rect().center()
+            widget.move(center.x() - widget.width() / 2, center.y() - widget.height() / 2)
 
     def centralWidget(self):
         """
@@ -89,7 +95,7 @@ class XOverlayWidget(QtGui.QWidget):
         :return     <bool>
         """
         if object == self.parent() and event.type() == QtCore.QEvent.Resize:
-            self.adjustSize(event.size())
+            self.resize(event.size())
         elif event.type() == QtCore.QEvent.Close:
             self.setResult(0)
         return False
@@ -118,12 +124,7 @@ class XOverlayWidget(QtGui.QWidget):
         :param      event | <QtCore.QEvent>
         """
         super(XOverlayWidget, self).resizeEvent(event)
-
-        widget = self.centralWidget()
-        if widget is not None:
-            center = self.rect().center()
-            widget.move(center.x() - widget.width() / 2, center.y() - widget.height() / 2)
-            self._closeButton.move(self.width() - 38, 6)
+        self.adjustSize()
 
     def setCentralWidget(self, widget):
         """
@@ -152,6 +153,10 @@ class XOverlayWidget(QtGui.QWidget):
         :param      state | <bool>
         """
         self._closable = state
+        if state:
+            self._closeButton.show()
+        else:
+            self._closeButton.hide()
 
     def setResult(self, result):
         """
