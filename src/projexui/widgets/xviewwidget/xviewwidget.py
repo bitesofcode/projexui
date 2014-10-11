@@ -14,32 +14,22 @@ __email__       = 'team@projexsoftware.com'
 
 from projex.text import nativestring
 
-from projexui.qt import Signal, Slot, wrapVariant, unwrapVariant, PyObject
-from projexui.qt.QtCore import QDir, Qt, QTimer
+from xqt import QtCore, QtGui, wrapVariant, unwrapVariant, PyObject
 
 import projexui
-from projexui.qt.QtGui import QCursor, \
-                              QIcon,\
-                              QMenu, \
-                              QMessageBox,\
-                              QScrollArea,\
-                              QFileDialog,\
-                              QPalette,\
-                              QApplication
-
 import projexui.resources
 
-from projexui.widgets.xviewwidget.xview          import XView
-from projexui.widgets.xviewwidget.xviewpanel     import XViewPanel
-from projexui.widgets.xviewwidget.xviewpanelmenu import XViewPanelMenu,\
-                                                        XViewPluginMenu,\
-                                                        XViewTabMenu
-from projexui.widgets.xviewwidget.xviewprofile   import XViewProfile
+from .xview          import XView
+from .xviewpanel     import XViewPanel
+from .xviewpanelmenu import XViewPanelMenu,\
+                            XViewPluginMenu,\
+                            XViewTabMenu
+from .xviewprofile   import XViewProfile
 
-class XViewWidget(QScrollArea):
+class XViewWidget(QtGui.QScrollArea):
     __designer_icon__ = projexui.resources.find('img/ui/scrollarea.png')
     
-    lockToggled = Signal(bool)
+    lockToggled = QtCore.Signal(bool)
     
     def __init__(self, parent):
         super(XViewWidget, self).__init__(parent)
@@ -53,18 +43,16 @@ class XViewWidget(QScrollArea):
         self._panelMenu         = None
         self._defaultProfile    = None
         self._scope             = None  # defines code execution scope for this widget
+        self._hint = ''
         
         # intiailize the scroll area
-        self.setBackgroundRole(QPalette.Window)
-        self.setFrameShape( QScrollArea.NoFrame )
+        self.setBackgroundRole(QtGui.QPalette.Window)
+        self.setFrameShape(QtGui.QScrollArea.NoFrame)
         self.setWidgetResizable(True)
         self.setWidget(XViewPanel(self, self.isLocked()))
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
-        
-        self.customContextMenuRequested.connect(self.showMenu)
-        
+
         # update the current view
-        app = QApplication.instance()
+        app = QtGui.QApplication.instance()
         app.focusChanged.connect(self.updateCurrentView)
     
     def canClose(self):
@@ -109,25 +97,25 @@ class XViewWidget(QScrollArea):
         
         :param      parent | <QMenu>
         """
-        menu = QMenu(parent)
+        menu = QtGui.QMenu(parent)
         menu.setTitle('&View')
         
         act = menu.addAction('Lock/Unlock Layout')
-        act.setIcon(QIcon(projexui.resources.find('img/view/lock.png')))
+        act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/lock.png')))
         act.triggered.connect(self.toggleLocked)
         
         menu.addSeparator()
         act = menu.addAction('Export Layout as...')
-        act.setIcon(QIcon(projexui.resources.find('img/view/export.png')))
+        act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/export.png')))
         act.triggered.connect(self.exportProfile)
         
         act = menu.addAction('Import Layout from...')
-        act.setIcon(QIcon(projexui.resources.find('img/view/import.png')))
+        act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/import.png')))
         act.triggered.connect(self.importProfile)
         
         menu.addSeparator()
         act = menu.addAction('Reset Layout')
-        act.setIcon(QIcon(projexui.resources.find('img/view/remove.png')))
+        act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/remove.png')))
         act.triggered.connect(self.reset)
         
         return menu
@@ -141,7 +129,7 @@ class XViewWidget(QScrollArea):
         """
         panels = self.panels()
         for panel in panels:
-            if ( panel.hasFocus() ):
+            if panel.hasFocus():
                 return panel
         
         if panels:
@@ -186,10 +174,10 @@ class XViewWidget(QScrollArea):
         :param      filename | <str>
         """
         if not (filename and isinstance(filename, basestring)):
-            filename = QFileDialog.getSaveFileName( self,
-                                                    'Export Layout as...',
-                                                    QDir.currentPath(),
-                                                    'XView (*.xview)')
+            filename = QtGui.QFileDialog.getSaveFileName(self,
+                                                         'Export Layout as...',
+                                                         QtCore.QDir.currentPath(),
+                                                         'XView (*.xview)')
             
             if type(filename) == tuple:
                 filename = filename[0]
@@ -222,10 +210,10 @@ class XViewWidget(QScrollArea):
         :param      filename | <str>
         """
         if not (filename and isinstance(filename, basestring)):
-            filename = QFileDialog.getOpenFileName( self,
-                                                    'Import Layout from...',
-                                                    QDir.currentPath(),
-                                                    'XView (*.xview)')
+            filename = QtGui.QFileDialog.getOpenFileName(self,
+                                                         'Import Layout from...',
+                                                         QtCore.QDir.currentPath(),
+                                                         'XView (*.xview)')
             
             if type(filename) == tuple:
                 filename = nativestring(filename[0])
@@ -242,7 +230,10 @@ class XViewWidget(QScrollArea):
             return
             
         profile.restore(self)
-    
+
+    def hint(self):
+        return self._hint
+
     def isEmpty(self):
         """
         Returns whether or not there are any XView widgets loaded for this
@@ -283,7 +274,7 @@ class XViewWidget(QScrollArea):
             if ( window ):
                 cls.registerToWindow(window)
     
-    @Slot(PyObject)
+    @QtCore.Slot(PyObject)
     def restoreProfile(self, profile):
         """
         Restores the profile settings based on the inputed profile.
@@ -327,16 +318,16 @@ class XViewWidget(QScrollArea):
         
         :return     <bool>
         """
-        answer = QMessageBox.Yes
-        opts = QMessageBox.Yes | QMessageBox.No
+        answer = QtGui.QMessageBox.Yes
+        opts = QtGui.QMessageBox.Yes | QtGui.QMessageBox.No
         
         if not force:
-            answer = QMessageBox.question( self,
-                                           'Reset Layout',
-                                           'Are you sure you want to reset?',
-                                           opts )
+            answer = QtGui.QMessageBox.question(self,
+                                                'Reset Layout',
+                                                'Are you sure you want to reset?',
+                                                opts)
         
-        if answer == QMessageBox.No:
+        if answer == QtGui.QMessageBox.No:
             return
         
         widget = self.widget()
@@ -421,7 +412,10 @@ class XViewWidget(QScrollArea):
         :param      profile | <XViewProfile>
         """
         self._defaultProfile = profile
-    
+
+    def setHint(self, hint):
+        self._hint = hint
+
     def setLocked(self, state):
         """
         Sets the locked state for this view widget.  When locked, a user no \
@@ -468,7 +462,7 @@ class XViewWidget(QScrollArea):
         :param      point | <QPoint>
         """
         menu = self.createMenu(self)
-        menu.exec_(QCursor.pos())
+        menu.exec_(QtGui.QCursor.pos())
         menu.deleteLater()
     
     def showPanelMenu(self, panel, point=None):
@@ -483,7 +477,7 @@ class XViewWidget(QScrollArea):
             self._panelMenu = XViewPanelMenu(self)
         
         if point is None:
-            point = QCursor.pos()
+            point = QtGui.QCursor.pos()
         
         self._panelMenu.setCurrentPanel(panel)
         self._panelMenu.exec_(point)
@@ -500,7 +494,7 @@ class XViewWidget(QScrollArea):
             self._pluginMenu = XViewPluginMenu(self)
         
         if point is None:
-            point = QCursor.pos()
+            point = QtGui.QCursor.pos()
         
         self._pluginMenu.setCurrentPanel(panel)
         self._pluginMenu.exec_(point)
@@ -515,9 +509,12 @@ class XViewWidget(QScrollArea):
         """
         if not self._tabMenu:
             self._tabMenu = XViewTabMenu(self)
-        
+
+        if point is None:
+            point = QtGui.QCursor.pos()
+
         self._tabMenu.setCurrentPanel(panel)
-        self._tabMenu.exec_(QCursor.pos())
+        self._tabMenu.exec_(point)
     
     def toggleLocked(self):
         """
@@ -584,3 +581,5 @@ class XViewWidget(QScrollArea):
         :return     <str>
         """
         return sorted(self._viewTypes, key = lambda x: x.viewName())
+
+    x_hint = QtCore.Property(unicode, hint, setHint)

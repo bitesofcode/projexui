@@ -50,18 +50,7 @@ class XViewDialog(QDialog):
             event.ignore()
         else:
             super(XViewDialog, self).closeEvent(event)
-    
-    def setVisible( self, state ):
-        """
-        Updates the view widget when the dialog is set to visible.
-        
-        :param      state | <bool>
-        """
-        super(XViewDialog, self).setVisible(state)
-        
-        if ( state ):
-            self.viewWidget().currentPanel().adjustButtons()
-    
+
     def viewWidget( self ):
         """
         Returns the view widget linked to this dialog.

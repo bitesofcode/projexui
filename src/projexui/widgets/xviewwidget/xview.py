@@ -246,11 +246,12 @@ class XView(QWidget):
             return
 
         elif not self.isViewSingleton():
-            super(XView, self).closeEvent(event)
-            QTimer.singleShot(0, self.deleteLater)
+            self.setAttribute(Qt.WA_DeleteOnClose)
 
         else:
-            super(XView, self).closeEvent(event)
+            self.setParent(self.window())  # attach the hidden singleton instance to the window vs. anything in the view
+
+        super(XView, self).closeEvent(event)
     
     def dispatchConnect(self, signal, slot):
         """
@@ -315,7 +316,7 @@ class XView(QWidget):
         
         if not self.signalsBlocked():
             self.visibleStateChanged.emit(False)
-            QTimer.singleShot(0, self.hidden.emit)
+            QTimer.singleShot(0, self.hidden)
     
     def initialize(self, force=False):
         """
@@ -619,7 +620,7 @@ class XView(QWidget):
         # signal will be emitted
         elif not self.signalsBlocked():
             self.visibleStateChanged.emit(True)
-            QTimer.singleShot(0, self.shown.emit)
+            QTimer.singleShot(0, self.shown)
             
     def signalPolicy(self):
         """
@@ -717,6 +718,7 @@ class XView(QWidget):
     def createInstance(cls, parent, viewWidget=None):
         singleton_key = '_{0}__singleton'.format(cls.__name__)
         singleton = getattr(cls, singleton_key, None)
+        singleton = singleton() if singleton is not None else None
         
         # assign the singleton instance
         if singleton is not None:
@@ -729,8 +731,7 @@ class XView(QWidget):
             inst.setViewWidget(viewWidget)
             
             if cls.isViewSingleton():
-                setattr(cls, singleton_key, inst)
-                inst.setAttribute(Qt.WA_DeleteOnClose, False)
+                setattr(cls, singleton_key, weakref.ref(inst))
             
             return inst
     

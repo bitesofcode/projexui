@@ -145,11 +145,13 @@ class XDropZoneWidget(QtGui.QWidget):
             self.resize(self.parent().width(), self.parent().height())
         
         elif event.type() == event.DragEnter:
+            self.raise_()
             if self._filter is None or self._filter(event):
                 for region in self.regions():
                     region.show()
         
         elif event.type() == event.DragMove:
+            self.raise_()
             if self._filter is None or self._filter(event):
                 pos = QtGui.QCursor.pos()
                 pos = self.mapFromGlobal(pos)

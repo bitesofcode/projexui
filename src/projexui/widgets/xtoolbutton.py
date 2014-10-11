@@ -59,6 +59,8 @@ class XToolButton(QtGui.QToolButton):
         self._movie             = None
         self._blinking          = False
         self._blinkInterval     = 500 # msecs
+        self._hoverable         = False
+        self._hoverIcon         = None
         
         # assign this toolbutton on a XToolBar class
         if len(args) > 0:
@@ -125,6 +127,9 @@ class XToolButton(QtGui.QToolButton):
             self._movie = None
     
     def enterEvent(self, event):
+        if self.isHoverable():
+            super(XToolButton, self).setIcon(self._hoverIcon)
+
         if self.isShadowed():
             if self.isClickable() and self.isEnabled():
                 effect = self.graphicsEffect()
@@ -178,10 +183,21 @@ class XToolButton(QtGui.QToolButton):
     def isColored(self):
         return self._colored
 
+    def isHoverable(self):
+        """
+        Returns whether or not this button should hide its icon when not hovered.
+
+        :return     <bool>
+        """
+        return self._hoverable
+
     def isShadowed(self):
         return self._shadowed
 
     def leaveEvent(self, event):
+        if self.isHoverable():
+            super(XToolButton, self).setIcon(QtGui.QIcon())
+
         if self.isShadowed() or self.isColored():
             self.updateUi()
         else:
@@ -191,27 +207,34 @@ class XToolButton(QtGui.QToolButton):
         """
         Overloads the paint even to render this button.
         """
+        if self.isHoverable() and self.icon().isNull():
+            return
+
         # initialize the painter
-        painter = QtGui.QStylePainter(self)
-        option = QtGui.QStyleOptionToolButton()
-        self.initStyleOption(option)
-        
-        # generate the scaling and rotating factors
-        x_scale = 1
-        y_scale = 1
-        
-        if self.flipHorizontal():
-            x_scale = -1
-        if self.flipVertical():
-            y_scale = -1
-        
-        center = self.rect().center()
-        painter.translate(center.x(), center.y())
-        painter.rotate(self.angle())
-        painter.scale(x_scale, y_scale)
-        painter.translate(-center.x(), -center.y())
-        
-        painter.drawComplexControl(QtGui.QStyle.CC_ToolButton, option)
+        painter = QtGui.QStylePainter()
+        painter.begin(self)
+        try:
+            option = QtGui.QStyleOptionToolButton()
+            self.initStyleOption(option)
+
+            # generate the scaling and rotating factors
+            x_scale = 1
+            y_scale = 1
+
+            if self.flipHorizontal():
+                x_scale = -1
+            if self.flipVertical():
+                y_scale = -1
+
+            center = self.rect().center()
+            painter.translate(center.x(), center.y())
+            painter.rotate(self.angle())
+            painter.scale(x_scale, y_scale)
+            painter.translate(-center.x(), -center.y())
+
+            painter.drawComplexControl(QtGui.QStyle.CC_ToolButton, option)
+        finally:
+            painter.end()
         
     def setAngle(self, angle):
         """
@@ -244,7 +267,6 @@ class XToolButton(QtGui.QToolButton):
         self._colored = state
         if state:
             self._shadowed = False
-            
             palette = self.palette()
             
             effect = QtGui.QGraphicsColorizeEffect(self)
@@ -261,7 +283,23 @@ class XToolButton(QtGui.QToolButton):
             self.setStyleSheet('')
             self.setGraphicsEffect(None)
             self.blink(False)
-    
+
+    def setHoverable(self, state):
+        """
+        Sets whether or not this is a hoverable button.  When in a hoverable state, the icon will only
+        be visible when the button is hovered on.
+
+        :param      state | <bool>
+        """
+        self._hoverable = state
+        self._hoverIcon = self.icon()
+
+    def setIcon(self, icon):
+        super(XToolButton, self).setIcon(icon)
+
+        if self.isHoverable():
+            self._hoverIcon = icon
+
     def setEnabled(self, state):
         """
         Updates the drop shadow effect for this widget on enable/disable
@@ -342,6 +380,12 @@ class XToolButton(QtGui.QToolButton):
     
     def shadowRadius(self):
         return self._shadowRadius
+
+    def showEvent(self, event):
+        super(XToolButton, self).showEvent(event)
+
+        if self.isHoverable():
+            super(XToolButton, self).setIcon(QtGui.QIcon())
 
     def timerEvent(self, event):
         effect = self.graphicsEffect()

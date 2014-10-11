@@ -14,10 +14,9 @@ __email__           = 'team@projexsoftware.com'
 #------------------------------------------------------------------------------
 
 from projexui import resources
-from projexui.widgets.xlineedit import XLineEdit
-from projexui.qt.QtCore import Qt
-from projexui.qt.QtGui import QToolButton, QIcon
-
+from xqt import QtCore, QtGui
+from .xlineedit import XLineEdit
+from .xtoolbutton import XToolButton
 
 class XSearchEdit(XLineEdit):
     def __init__(self, parent=None):
@@ -25,16 +24,16 @@ class XSearchEdit(XLineEdit):
         
         # setup default properties
         self.setHint('enter search')
-        self.setIcon(QIcon(resources.find('img/search.png')))
+        self.setIcon(QtGui.QIcon(resources.find('img/search.png')))
         self.setCornerRadius(8)
         
         # setup custom properties
-        self._cancelButton = QToolButton(self)
-        self._cancelButton.setIcon(QIcon(resources.find('img/remove_dark.png')))
-        self._cancelButton.setAutoRaise(True)
+        self._cancelButton = XToolButton(self)
+        self._cancelButton.setIcon(QtGui.QIcon(resources.find('img/remove_dark.png')))
         self._cancelButton.setToolTip('Clear Search Text')
+        self._cancelButton.setShadowed(True)
         self._cancelButton.hide()
-        self.addButton(self._cancelButton, Qt.AlignRight)
+        self.addButton(self._cancelButton, QtCore.Qt.AlignRight)
         
         # create connections
         self._cancelButton.clicked.connect(self.clear)
