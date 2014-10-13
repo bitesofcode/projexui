@@ -1869,7 +1869,7 @@ class XTreeWidget(QtGui.QTreeWidget):
         :param      state | <bool>
         """
         delegate = self.itemDelegate()
-        if ( isinstance(delegate, XTreeWidgetDelegate) ):
+        if isinstance(delegate, XTreeWidgetDelegate):
             delegate.setShowRichText(state)
     
     def setVisibleColumns(self, visible):

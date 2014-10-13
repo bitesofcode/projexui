@@ -470,11 +470,13 @@
   </qresource>
   <qresource prefix="default/img/view">
     <file alias="add.png">default\img\view\add.png</file>
+    <file alias="add_dark.png">default\img\view\add_dark.png</file>
     <file alias="back.png">default\img\view\back.png</file>
     <file alias="close.png">default\img\view\close.png</file>
     <file alias="detach.png">default\img\view\detach.png</file>
     <file alias="detach_copy.png">default\img\view\detach_copy.png</file>
     <file alias="down.png">default\img\view\down.png</file>
+    <file alias="drag.png">default\img\view\drag.png</file>
     <file alias="export.png">default\img\view\export.png</file>
     <file alias="forward.png">default\img\view\forward.png</file>
     <file alias="group.png">default\img\view\group.png</file>

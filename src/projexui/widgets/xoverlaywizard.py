@@ -202,6 +202,14 @@ class XOverlayWizardPage(QtGui.QFrame):
         """
         return self._titleLabel.text()
 
+    def validatePage(self):
+        """
+        Performs a validation check before trying to continue from this page.
+
+        :return     <bool>
+        """
+        return True
+
     def wizard(self):
         """
         Returns the wizard associated with this page.
@@ -536,6 +544,8 @@ class XOverlayWizard(XOverlayWidget):
         curr_page = self.currentPage()
         if not curr_page:
             return
+        elif not curr_page.validatePage():
+            return
 
         pageId = curr_page.nextId()
         try:
@@ -596,6 +606,14 @@ class XOverlayWizard(XOverlayWidget):
         :return     <projexui.widgets.xoverlaywizard.XOverlayWizardPage> || None
         """
         return self._pages.get(pageId)
+
+    def pageCount(self):
+        """
+        Returns the number of pages associated with this wizard.
+
+        :return     <int>
+        """
+        return len(self._pages)
 
     def pageIds(self):
         """

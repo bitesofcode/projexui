@@ -4,3 +4,5 @@
 /src/dist
 /src/projexui.egg-info
 /.build
+/bin/*.exe
+/bin/*.zip

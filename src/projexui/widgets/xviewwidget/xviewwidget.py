@@ -28,6 +28,9 @@ from .xviewprofile   import XViewProfile
 
 class XViewWidget(QtGui.QScrollArea):
     __designer_icon__ = projexui.resources.find('img/ui/scrollarea.png')
+    __designer_propspecs__ = {
+        'x_hint': ('string', 'richtext')
+    }
     
     lockToggled = QtCore.Signal(bool)
     
@@ -51,9 +54,12 @@ class XViewWidget(QtGui.QScrollArea):
         self.setWidgetResizable(True)
         self.setWidget(XViewPanel(self, self.isLocked()))
 
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+
         # update the current view
         app = QtGui.QApplication.instance()
         app.focusChanged.connect(self.updateCurrentView)
+        self.customContextMenuRequested.connect(self.showMenu)
     
     def canClose(self):
         """

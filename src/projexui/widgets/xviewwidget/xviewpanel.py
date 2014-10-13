@@ -576,6 +576,8 @@ class XViewPanel(QtGui.QStackedWidget):
         self._hintLabel.setAlignment(QtCore.Qt.AlignCenter)
         self._hintLabel.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
         self._hintLabel.setFocusPolicy(QtCore.Qt.NoFocus)
+        self._hintLabel.setWordWrap(True)
+        self._hintLabel.setMargin(10)
 
         # create actions
         add_tab_action = QtGui.QAction(self)
@@ -806,7 +808,13 @@ class XViewPanel(QtGui.QStackedWidget):
         self.setMinimumSize(minw, minh)
         self.setMaximumSize(maxw, maxh)
         self.setSizePolicy(widget.sizePolicy())
-    
+
+    def closeEvent(self, event):
+        # don't process anything after close
+        self.currentChanged.disconnect()
+
+        super(XViewPanel, self).closeEvent(event)
+
     def closeView(self, view=None):
         """
         Closes the inputed view.
@@ -842,7 +850,7 @@ class XViewPanel(QtGui.QStackedWidget):
 
         container = self.parentWidget()
         viewWidget = self.viewWidget()
-        
+
         # close all the child views
         for i in xrange(self.count() - 1, -1, -1):
             self.widget(i).close()
@@ -870,7 +878,7 @@ class XViewPanel(QtGui.QStackedWidget):
                     widget.setParent(viewWidget)
                     
                     if projexui.QT_WRAPPER == 'PySide':
-                        old_widget = viewWidget.takeWidget()
+                        _ = viewWidget.takeWidget()
                     else:
                         old_widget = viewWidget.widget()
                         old_widget.setParent(None)
@@ -1177,7 +1185,13 @@ class XViewPanel(QtGui.QStackedWidget):
         super(XViewPanel, self).resizeEvent(event)
 
         self._tabBar.resize(event.size().width(), self._tabBar.height())
-        self._hintLabel.resize(self.width(), self.height())
+
+        if self._tabBar.isVisible():
+            self._hintLabel.move(0, self._tabBar.height() + 3)
+            self._hintLabel.resize(self.width(), self.height() - self._tabBar.height())
+        else:
+            self._hintLabel.move(0, 0)
+            self._hintLabel.resize(self.width(), self.height())
 
     def removeTab(self, index):
         """
@@ -1390,7 +1404,10 @@ class XViewPanel(QtGui.QStackedWidget):
         super(XViewPanel, self).showEvent(event)
         
         # start a delay option to initialize this panel
-        self.startTimer(50)
+        self.setLocked(self.isLocked(), force=True)
+
+        self._hintLabel.setText(self.hint())
+        self._hintLabel.setVisible(not bool(self.count()))
     
     def showAddMenu(self, point=None):
         if self.isLocked():
@@ -1463,13 +1480,6 @@ class XViewPanel(QtGui.QStackedWidget):
         """
         return self._tabBar.tabText(index)
 
-    def timerEvent(self, event):
-        self.killTimer(event.timerId())
-        self.setLocked(self.isLocked(), force=True)
-
-        self._hintLabel.setText(self.hint())
-        self._hintLabel.setVisible(not bool(self.count()))
-    
     def viewWidget(self):
         from projexui.widgets.xviewwidget.xviewwidget import XViewWidget
         
