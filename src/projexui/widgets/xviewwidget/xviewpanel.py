@@ -567,10 +567,10 @@ class XViewPanel(QtGui.QStackedWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # create custom properties
-        self._tabBar = XViewPanelBar(self)
-        self._tabBar.show()
         self._locked = locked
         self._hideTabsWhenLocked = True
+        self._tabBar = XViewPanelBar(self)
+        self._tabBar.show()
 
         self._hintLabel = QtGui.QLabel(self)
         self._hintLabel.setAlignment(QtCore.Qt.AlignCenter)

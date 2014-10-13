@@ -147,11 +147,12 @@ class XViewProfileToolBar(XToolBar):
         
         # reset the layout
         widget = self.viewWidget()
-        widget.reset(force=True)
-        widget.setLocked(False)
+        if self.sender() != widget:
+            widget.reset(force=True)
+            widget.setLocked(False)
         
         self.currentProfileChanged.emit(None)
-    
+
     def currentProfile(self):
         """
         Returns the current profile for this toolbar.
@@ -421,6 +422,8 @@ class XViewProfileToolBar(XToolBar):
         :param      viewWidget | <XViewWidget>
         """
         self._viewWidget = viewWidget
+        if viewWidget:
+            viewWidget.resetFinished.connect(self.clearActive)
     
     def saveSettings(self, settings):
         """

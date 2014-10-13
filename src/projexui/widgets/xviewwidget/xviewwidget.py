@@ -33,6 +33,7 @@ class XViewWidget(QtGui.QScrollArea):
     }
     
     lockToggled = QtCore.Signal(bool)
+    resetFinished = QtCore.Signal()
     
     def __init__(self, parent):
         super(XViewWidget, self).__init__(parent)
@@ -105,25 +106,26 @@ class XViewWidget(QtGui.QScrollArea):
         """
         menu = QtGui.QMenu(parent)
         menu.setTitle('&View')
-        
-        act = menu.addAction('Lock/Unlock Layout')
+
+        act = menu.addAction('&Lock/Unlock Layout')
         act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/lock.png')))
         act.triggered.connect(self.toggleLocked)
         
         menu.addSeparator()
-        act = menu.addAction('Export Layout as...')
+        act = menu.addAction('&Export Layout as...')
         act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/export.png')))
         act.triggered.connect(self.exportProfile)
         
-        act = menu.addAction('Import Layout from...')
+        act = menu.addAction('&Import Layout from...')
         act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/import.png')))
         act.triggered.connect(self.importProfile)
-        
+
         menu.addSeparator()
-        act = menu.addAction('Reset Layout')
+
+        act = menu.addAction('&Clear Layout')
         act.setIcon(QtGui.QIcon(projexui.resources.find('img/view/remove.png')))
-        act.triggered.connect(self.reset)
-        
+        act.triggered.connect(self.resetForced)
+
         return menu
     
     def currentPanel(self):
@@ -133,15 +135,8 @@ class XViewWidget(QtGui.QScrollArea):
         
         :return     <XViewPanel>  || None
         """
-        panels = self.panels()
-        for panel in panels:
-            if panel.hasFocus():
-                return panel
-        
-        if panels:
-            return panels[0]
-        
-        return None
+        focus_widget = QtGui.QApplication.instance().focusWidget()
+        return projexui.ancestor(focus_widget, XViewPanel)
     
     def currentView(self):
         """
@@ -356,10 +351,15 @@ class XViewWidget(QtGui.QScrollArea):
         
         # otherwise create a new panel
         else:
-            self.setWidget(XViewPanel(self, self.isLocked()))
-        
+            self.setLocked(False)
+            self.setWidget(XViewPanel(self, False))
+
+        self.resetFinished.emit()
         return True
-    
+
+    def resetForced(self):
+        return self.reset(force=True)
+
     def saveProfile(self):
         """
         Saves the profile for the current state and returns it.
@@ -566,7 +566,21 @@ class XViewWidget(QtGui.QScrollArea):
         :return     [<XView>, ..]
         """
         return self.findChildren(XView)
-    
+
+    def viewAt(self, point):
+        """
+        Looks up the view at the inputed point.
+
+        :param      point | <QtCore.QPoint>
+
+        :return     <projexui.widgets.xviewwidget.XView> || None
+        """
+        widget = self.childAt(point)
+        if widget:
+            return projexui.ancestor(widget, XView)
+        else:
+            return None
+
     def viewType(self, name):
         """
         Looks up the view class based on the inputd name.
@@ -576,7 +590,7 @@ class XViewWidget(QtGui.QScrollArea):
         :return     <subclass of XView> || None
         """
         for view in self._viewTypes:
-            if ( view.viewName() == name ):
+            if view.viewName() == name:
                 return view
         return None
     
