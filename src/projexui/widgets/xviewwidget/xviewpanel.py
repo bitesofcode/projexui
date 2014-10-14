@@ -32,6 +32,7 @@ class XViewPanelItem(QtGui.QWidget):
         super(XViewPanelItem, self).__init__(parent)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setAcceptDrops(True)
 
         # define custom properties
         self._dragLabel = QtGui.QLabel(self)
@@ -45,6 +46,8 @@ class XViewPanelItem(QtGui.QWidget):
         self._titleLabel.setText(title)
         self._titleLabel.setEditable(True)
         self._hovered = False
+        self._locked = False
+        self._moveItemStarted = False
 
         palette = self.palette()
         palette.setColor(palette.Shadow, palette.color(palette.Window).darker(175))
@@ -88,8 +91,43 @@ class XViewPanelItem(QtGui.QWidget):
         """
         self.parent().setCurrentItem(self)
 
+    def adjustButtonSize(self):
+        if self._locked:
+            self._dragLabel.setFixedWidth(28)
+            self._spacer.setFixedWidth(28)
+        else:
+            self._dragLabel.setFixedWidth(12 if self.isActive() else 28)
+            self._spacer.setFixedWidth(12)
+
     def closeTab(self):
         self.parent().closeTab(self)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('x-application/xview/panel_item') \
+           and event.source().parent() == self.parent():
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('x-application/xview/panel_item') \
+           and event.source().parent() == self.parent():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        tabbar = self.parent()
+        panel = tabbar.parent()
+        drop_index = tabbar.indexOf(self)
+        drag_index = tabbar.indexOf(event.source())
+
+        # don't drag & drop on self
+        if drop_index == drag_index:
+            return
+
+        widget = panel.widget(drag_index)
+        panel.blockSignals(True)
+        panel.insertWidget(drop_index, widget)
+        panel.blockSignals(False)
+
+        tabbar.insertTab(drop_index, event.source())
 
     def enterEvent(self, event):
         """
@@ -123,6 +161,9 @@ class XViewPanelItem(QtGui.QWidget):
         """
         return self.parent().currentItem() == self
 
+    def isLocked(self):
+        return self._locked
+
     def paintEvent(self, event):
         """
         Runs the paint event for this item.
@@ -153,16 +194,17 @@ class XViewPanelItem(QtGui.QWidget):
 
 
             # draw the drag buttons
-            center = self._dragLabel.geometry().center()
-            x = center.x()
-            y = center.y()
-            width = 3
+            if not self._locked:
+                center = self._dragLabel.geometry().center()
+                x = 6
+                y = center.y()
+                width = 3
 
-            painter.setBrush(palette.color(palette.Window).lighter(120))
+                painter.setBrush(palette.color(palette.Window).lighter(120))
 
-            painter.drawRect(x - width / 2, (y - width - 2) - width / 2, width, width)
-            painter.drawRect(x - width / 2, y - width / 2, width, width)
-            painter.drawRect(x - width / 2, (y + width + 2) - width / 2, width, width)
+                painter.drawRect(x - width / 2, (y - width - 2) - width / 2, width, width)
+                painter.drawRect(x - width / 2, y - width / 2, width, width)
+                painter.drawRect(x - width / 2, (y + width + 2) - width / 2, width, width)
 
         finally:
             painter.end()
@@ -173,7 +215,11 @@ class XViewPanelItem(QtGui.QWidget):
 
         :param      event | <QtCore.QMousePressEvent>
         """
-        if self._dragLabel.geometry().contains(event.pos()):
+        self._moveItemStarted = False
+        rect = QtCore.QRect(0, 0, 12, self.height())
+
+        # drag the tab off
+        if not self._locked and rect.contains(event.pos()):
             tabbar = self.parent()
             panel = tabbar.parent()
 
@@ -183,33 +229,45 @@ class XViewPanelItem(QtGui.QWidget):
 
             drag = QtGui.QDrag(panel)
             data = QtCore.QMimeData()
-            data.setData('x-application/xview/tabbed_view',
-                         QtCore.QByteArray(str(index)))
+            data.setData('x-application/xview/tabbed_view', QtCore.QByteArray(str(index)))
             drag.setMimeData(data)
             drag.setPixmap(pixmap)
-
-            orig_parent = view.parent()
-            reshow = False
-            if self.isActive():
-                view.hide()
-                reshow = True
 
             if not drag.exec_():
                 cursor = QtGui.QCursor.pos()
                 geom = self.window().geometry()
                 if not geom.contains(cursor):
                     view.popout()
-                elif reshow:
-                    view.show()
-            elif reshow:
-                view.show()
 
-            #if view.parent() != orig_parent:
-            #    self.parent().removeTab(index)
+        # allow moving indexes around
+        elif not self._locked and self.isActive():
+            self._moveItemStarted = self.parent().count() > 1
+
         else:
             self.activate()
 
         super(XViewPanelItem, self).mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self._moveItemStarted:
+            index = self.parent().indexOf(self)
+            pixmap = QtGui.QPixmap.grabWidget(self)
+
+            drag = QtGui.QDrag(self)
+            data = QtCore.QMimeData()
+            data.setData('x-application/xview/panel_item', QtCore.QByteArray(str(index)))
+            drag.setMimeData(data)
+            drag.setPixmap(pixmap)
+            drag.setHotSpot(self.mapFromGlobal(QtGui.QCursor.pos()))
+
+            drag.exec_()
+            self._moveItemStarted = False
+
+        super(XViewPanelItem, self).mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        self._moveItemStarted = False
+        super(XViewPanelItem, self).mouseReleaseEvent(event)
 
     def setFixedHeight(self, height):
         """
@@ -223,6 +281,16 @@ class XViewPanelItem(QtGui.QWidget):
         self._titleLabel.setFixedHeight(height)
         self._searchButton.setFixedHeight(height)
         self._closeButton.setFixedHeight(height)
+
+    def setMenuEnabled(self, state):
+        self._searchButton.setVisible(not self._locked and state)
+        self.adjustButtonSize()
+
+    def setLocked(self, state):
+        self._locked = state
+        self._closeButton.setVisible(not state)
+        self._searchButton.setVisible(self.isActive() and not state)
+        self.adjustButtonSize()
 
     def setText(self, text):
         """
@@ -262,6 +330,7 @@ class XViewPanelBar(QtGui.QWidget):
         self.setFixedHeight(22)
 
         self._currentIndex = -1
+        self._locked = False
 
         # create the split buttons
         palette = self.palette()
@@ -315,19 +384,20 @@ class XViewPanelBar(QtGui.QWidget):
     def addButton(self):
         return self._addButton
 
-    def addTab(self, text):
+    def addTab(self, tab):
         """
         Adds a new tab to this panel bar.
 
-        :param      text | <str>
+        :param      tab | <XViewPanelItem> || <str>
 
         :return     <int>
         """
-        item = XViewPanelItem(text, self)
-        item.setFixedHeight(self.height())
+        if not isinstance(tab, XViewPanelItem):
+            tab = XViewPanelItem(tab, self)
+            tab.setFixedHeight(self.height())
 
         index = len(self.items())
-        self.layout().insertWidget(index, item)
+        self.layout().insertWidget(index, tab)
 
         self.setCurrentIndex(index)
 
@@ -392,20 +462,24 @@ class XViewPanelBar(QtGui.QWidget):
         except StandardError:
             return -1
 
-    def insertTab(self, index, text):
+    def insertTab(self, index, tab):
         """
         Adds a new tab to this panel bar.
 
-        :param      text | <str>
+        :param      tab | <XViewPanelItem> || <str>
 
         :return     <int>
         """
-        item = XViewPanelItem(text, self)
-        item.setFixedHeight(self.height())
+        if not isinstance(tab, XViewPanelItem):
+            tab = XViewPanelItem(tab, self)
+            tab.setFixedHeight(self.height())
 
-        self.layout().insertWidget(index, item)
-
+        # remove it from the layout first
+        self.layout().insertWidget(index, tab)
         self.setCurrentIndex(index)
+
+    def isLocked(self):
+        return self._locked
 
     def items(self):
         """
@@ -507,6 +581,9 @@ class XViewPanelBar(QtGui.QWidget):
         self._currentIndex = index
         self.currentIndexChanged.emit(index)
 
+        for i, item in enumerate(self.items()):
+            item.setMenuEnabled(i == index)
+
     def setCurrentItem(self, item):
         """
         Sets the current item to the inputed widget.
@@ -514,6 +591,16 @@ class XViewPanelBar(QtGui.QWidget):
         :param      item | <XViewPanelItem>
         """
         self.setCurrentIndex(self.layout().indexOf(item))
+
+    def setLocked(self, state):
+        self._locked = state
+        self._addButton.setVisible(not state)
+        self._horizontalButton.setVisible(not state)
+        self._verticalButton.setVisible(not state)
+        self._optionsButton.setVisible(not state)
+
+        for item in self.items():
+            item.setLocked(state)
 
     def setFixedHeight(self, height):
         """
@@ -570,7 +657,6 @@ class XViewPanel(QtGui.QStackedWidget):
         self._locked = locked
         self._hideTabsWhenLocked = True
         self._tabBar = XViewPanelBar(self)
-        self._tabBar.show()
 
         self._hintLabel = QtGui.QLabel(self)
         self._hintLabel.setAlignment(QtCore.Qt.AlignCenter)
@@ -613,6 +699,7 @@ class XViewPanel(QtGui.QStackedWidget):
         self.setSizePolicy(sizePolicy)
         self.setAcceptDrops(True)
         self.setContentsMargins(6, self._tabBar.height(), 6, 6)
+        self.setLocked(locked, force=True)
         
         # create the drop zone widget
         self._dropZone = XDropZoneWidget(self)
@@ -1313,7 +1400,8 @@ class XViewPanel(QtGui.QStackedWidget):
             splitter.setSizePolicy(sizePolicy)
             
             area.setWidget(splitter)
-        
+
+        self.setLocked(self.isLocked(), force=True)
         window.setUpdatesEnabled(True)
         return new_panel
         
@@ -1343,6 +1431,7 @@ class XViewPanel(QtGui.QStackedWidget):
         
         self._locked = state
         tabbar = self.tabBar()
+        tabbar.setLocked(state)
         if self.hideTabsWhenLocked():
             tabbar.setVisible(self.count() > 1 or not state)
         else:
@@ -1408,6 +1497,7 @@ class XViewPanel(QtGui.QStackedWidget):
 
         self._hintLabel.setText(self.hint())
         self._hintLabel.setVisible(not bool(self.count()))
+        self.setCurrentIndex(self._tabBar.currentIndex())
     
     def showAddMenu(self, point=None):
         if self.isLocked():
@@ -1460,7 +1550,7 @@ class XViewPanel(QtGui.QStackedWidget):
         # close it in a second.  It depends on which thread triggers this call
         # that sometimes causes it to error out. - EKH 01/25/12
         if count == 1:
-            panel.closePanel()
+            QtCore.QTimer.singleShot(0, panel.closePanel)
 
     def tabBar(self):
         """

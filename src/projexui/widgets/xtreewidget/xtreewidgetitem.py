@@ -91,7 +91,7 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
             
             try:
                 height = tree.defaultItemHeight()
-            except:
+            except StandardError:
                 height = 0
             
             if height:
@@ -339,10 +339,7 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         :param      column | <int>
                     state  | <bool>
         """
-        if state:
-            self.setCheckState(0, QtCore.Qt.Checked)
-        else:
-            self.setCheckState(0, QtCore.Qt.Unchecked)
+        self.setCheckState(column, QtCore.Qt.Checked if state else QtCore.Qt.Unchecked)
     
     def setDragData(self, format, value):
         """

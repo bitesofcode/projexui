@@ -44,6 +44,8 @@ from projexui.qt.QtGui    import QAbstractButton,\
                                  QGraphicsDropShadowEffect,\
                                  QAbstractButton
 
+from xqt import QtCore, QtGui
+
 from projexui.xpainter import XPainter
 from projex.enum import enum
 from projex.decorators import deprecatedmethod
@@ -89,6 +91,7 @@ class XPopupWidget(QWidget):
         self._animated              = False
         self._currentMode           = None
         self._positionLinkedTo      = []
+        self._possibleAnchors       = XPopupWidget.Anchor.all()
         
         # define controls
         self._result        = 0
@@ -659,7 +662,10 @@ class XPopupWidget(QWidget):
         :return     <bool>
         """
         return self._animated
-    
+
+    def isPossibleAnchor(self, anchor):
+        return bool(anchor & self._possibleAnchors)
+
     def isResizable(self):
         """
         Returns if this popup is resizable or not.
@@ -687,41 +693,67 @@ class XPopupWidget(QWidget):
         
         super(XPopupWidget, self).keyPressEvent(event)
     
-    def mapAnchorFrom( self, widget, globalPos ):
+    def mapAnchorFrom(self, widget, point):
         """
         Returns the anchor point that best fits within the given widget from
         the inputed global position.
         
         :param      widget      | <QWidget>
-                    globalPos   | <QPoint>
+                    point       | <QPoint>
         
         :return     <XPopupWidget.Anchor>
         """
-        localPos = widget.mapFromGlobal(globalPos)
-        
-        x = localPos.x()
-        y = localPos.y()
-        w = widget.width()
-        h = widget.height()
-        
-        cw = self.width() / 2
-        ch = self.height() / 2
-        
-        # by default, try to do a center point, so make sure the center point
-        # is at least 1/2 the width longer from each edge
-        if x < cw and h - y < ch:
-            return XPopupWidget.Anchor.BottomLeft
-        elif x < cw:
-            return XPopupWidget.Anchor.TopLeft
-        elif w - x < cw and h - y < ch:
-            return XPopupWidget.Anchor.BottomRight
-        elif w - x < cw:
-            return XPopupWidget.Anchor.TopRight
-        elif h - y < ch:
-            return XPopupWidget.Anchor.BottomCenter
-        else:
-            return XPopupWidget.Anchor.TopCenter
-    
+        screen_geom = QtGui.QDesktopWidget(self).screenGeometry()
+
+        # calculate the end rect for each position
+        Anchor = self.Anchor
+        w = self.width()
+        h = self.height()
+
+        possible_rects = {
+            # top anchors
+            Anchor.TopLeft: QtCore.QRect(point.x(), point.y(), w, h),
+            Anchor.TopCenter: QtCore.QRect(point.x() - w / 2, point.y(), w, h),
+            Anchor.TopRight: QtCore.QRect(point.x() - w, point.y(), w, h),
+
+            # left anchors
+            Anchor.LeftTop: QtCore.QRect(point.x(), point.y(), w, h),
+            Anchor.LeftCenter: QtCore.QRect(point.x(), point.y() - h / 2, w, h),
+            Anchor.LeftBottom: QtCore.QRect(point.x(), point.y() - h, w, h),
+
+            # bottom anchors
+            Anchor.BottomLeft: QtCore.QRect(point.x(), point.y() - h, w, h),
+            Anchor.BottomCenter: QtCore.QRect(point.x() - w / 2, point.y() - h, w, h),
+            Anchor.BottomRight: QtCore.QRect(point.x() - w, point.y() - h, w, h),
+
+            # right anchors
+            Anchor.RightTop: QtCore.QRect(point.x() - self.width(), point.y(), w, h),
+            Anchor.RightCenter: QtCore.QRect(point.x() - self.width(), point.y() - h / 2, w, h),
+            Anchor.RightBottom: QtCore.QRect(point.x() - self.width(), point.y() - h, w ,h)
+        }
+
+        for anchor in (Anchor.TopCenter,
+                       Anchor.BottomCenter,
+                       Anchor.LeftCenter,
+                       Anchor.RightCenter,
+                       Anchor.TopLeft,
+                       Anchor.LeftTop,
+                       Anchor.BottomLeft,
+                       Anchor.LeftBottom,
+                       Anchor.TopRight,
+                       Anchor.RightTop,
+                       Anchor.BottomRight,
+                       Anchor.RightBottom):
+
+            if not self.isPossibleAnchor(anchor):
+                continue
+
+            rect = possible_rects[anchor]
+            if screen_geom.contains(rect):
+                return anchor
+
+        return self.anchor()
+
     def popup(self, pos=None):
         """
         Pops up this widget at the inputed position.  The inputed point should \
@@ -750,7 +782,7 @@ class XPopupWidget(QWidget):
         
         # auto-calculate the point
         if self.autoCalculateAnchor():
-            self.setAnchor(self.mapAnchorFrom( self.parent(), pos ))
+            self.setAnchor(self.mapAnchorFrom(self.parent(), pos))
         
         pad = self.popupPadding()
         
@@ -866,7 +898,10 @@ class XPopupWidget(QWidget):
         :return     <int>
         """
         return self._popupPadding
-    
+
+    def possibleAnchors(self):
+        return self._possibleAnchors
+
     def positionLinkedTo(self):
         """
         Returns the widget that this popup is linked to for positional changes.
@@ -963,7 +998,7 @@ class XPopupWidget(QWidget):
         self._anchor = anchor
         self.adjustContentsMargins()
     
-    def setAutoCalculateAnchor( self, state ):
+    def setAutoCalculateAnchor(self, state=True):
         """
         Sets whether or not this widget should auto-calculate the anchor point
         based on the parent position when the popup is triggered.
@@ -1055,7 +1090,10 @@ class XPopupWidget(QWidget):
         """
         self._popupPadding = padding
         self.adjustContentsMargins()
-    
+
+    def setPossibleAnchors(self, anchors):
+        self._possibleAnchors = anchors
+
     def setPositionLinkedTo(self, widgets):
         """
         Sets the widget that this popup will be linked to for positional

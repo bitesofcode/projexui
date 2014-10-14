@@ -358,8 +358,23 @@ def loadUi(modulefile, inst, uifile=None, theme='default', className=None):
     # use compiled information vs. dynamic generation
     widget = None
     if USE_COMPILED:
+        # find the root module
+        def find_root_module(cls, name):
+            if cls.__name__ == name:
+                return cls.__module__.rpartition('.')[0]
+            else:
+                for base in cls.__bases__:
+                    if not issubclass(base, QtGui.QWidget):
+                        continue
+
+                    out = find_root_module(base, name)
+                    if out:
+                        return out
+
         wrapper = QT_WRAPPER.lower()
-        root_module, _, _ = inst.__module__.rpartition('.')
+        root_module = find_root_module(inst.__class__, className)
+        if not root_module:
+            root_module = inst.__module__.rpartition('.')[0]
         basename = className.lower()
         
         modname_a = '{0}.ui.{1}_{2}_{3}_ui'.format(root_module, basename, theme, wrapper)

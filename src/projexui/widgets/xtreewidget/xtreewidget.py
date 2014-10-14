@@ -1087,7 +1087,7 @@ class XTreeWidget(QtGui.QTreeWidget):
         """
         return self._hoveredColumn
     
-    def hoveredItem( self ):
+    def hoveredItem(self):
         """
         Returns the currently hovered item.
         
@@ -1097,7 +1097,7 @@ class XTreeWidget(QtGui.QTreeWidget):
         if ( self._hoveredItem is not None ):
             out = self._hoveredItem()
             
-            if ( out is None ):
+            if out is None:
                 self._hoveredItem = None
         
         return out
@@ -1287,77 +1287,77 @@ class XTreeWidget(QtGui.QTreeWidget):
         Overloads when a mouse press occurs.  If in editable mode, and the
         click occurs on a selected index, then the editor will be created
         and no selection change will occur.
-        
+
         :param      event | <QMousePressEvent>
         """
         item = self.itemAt(event.pos())
         column = self.columnAt(event.pos().x())
-        
+
         mid_button = event.button() == QtCore.Qt.MidButton
         ctrl_click = event.button() == QtCore.Qt.LeftButton and \
                      event.modifiers() == QtCore.Qt.ControlModifier
-        
+
         if item and column != -1:
             self._downItem   = weakref.ref(item)
             self._downColumn = column
             self._downState  = item.checkState(column)
-        
+
         elif not item:
             self.setCurrentItem(None)
             self.clearSelection()
-        
+
         if (mid_button or ctrl_click) and item and column != -1:
             self.itemMiddleClicked.emit(item, column)
-        
+
         index = self.indexAt(event.pos())
         sel_model = self.selectionModel()
-        
+
         if self.isEditable() and index and sel_model.isSelected(index):
             sel_model.setCurrentIndex(index, sel_model.NoUpdate)
             self.edit(index, self.SelectedClicked, event)
             event.accept()
         else:
             super(XTreeWidget, self).mousePressEvent(event)
-    
+
     def mouseMoveEvent(self, event):
         """
         Tracks when an item is hovered and exited.
-        
+
         :param      event | <QMoustEvent>
         """
-        if ( self.hoverMode() != XTreeWidget.HoverMode.NoHover ):
+        if self.hoverMode() != XTreeWidget.HoverMode.NoHover:
             item  = self.itemAt(event.pos())
             col   = self.columnAt(event.pos().x())
             hitem = self.hoveredItem()
             hcol  = self.hoveredColumn()
-            
-            if ( (id(item), col) != (id(hitem), hcol) ):
+
+            if (id(item), col) != (id(hitem), hcol):
                 if ( item ):
                     self._hoveredItem = weakref.ref(item)
                 else:
                     self._hoveredItem = None
-                
+
                 self._hoveredColumn = col
-                
+
                 rect  = self.visualItemRect(item)
                 hrect = self.visualItemRect(hitem)
-                
+
                 rect.setWidth(self.viewport().width())
                 hrect.setWidth(self.viewport().width())
-                
+
                 self.viewport().update(rect)
                 self.viewport().update(hrect)
-        
+
         super(XTreeWidget, self).mouseMoveEvent(event)
-    
+
     def mouseReleaseEvent(self, event):
         super(XTreeWidget, self).mouseReleaseEvent(event)
-        
+
         if self._downItem and self._downItem():
             state = self._downItem().checkState(self._downColumn)
             if state != self._downState:
                 self.itemCheckStateChanged.emit(self._downItem(), self._downColumn)
-        
+
         self._downItem = None
         self._downState = None
         self._downColumn = None
