@@ -1,1 +1,2 @@
-__toc__ = ['projexui.exporters.xexcelexporter']
+__recurse__ = False
+__toc__ = [r'projexui.exporters.xexcelexporter']

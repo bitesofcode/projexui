@@ -92,8 +92,9 @@ def buildResourceFile(rscpath, outpath=''):
         outpath = os.path.join(outpath, filename)
     
     # try to use Qt first, because it is so much better
+    PYQT_RCC_EXE = os.environ.get('PYQT_RCC_EXE', 'pyrcc4.exe')
     try:
-        subprocess.call(['pyrcc4.exe', '-o', outpath, rscpath])
+        subprocess.call([PYQT_RCC_EXE, '-o', outpath, rscpath])
         used_pyqt = True
     except StandardError:
         used_pyqt = False
@@ -110,6 +111,7 @@ def buildResourceFile(rscpath, outpath=''):
     
     # make sure we actually generated a file
     if not os.path.exists(outpath):
+        logger.error('Failed to generate output file: {0}'.format(outpath))
         return False
     
     # map the output back to PySide if necessary
