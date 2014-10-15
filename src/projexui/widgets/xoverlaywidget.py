@@ -13,6 +13,7 @@ class XOverlayWidget(QtGui.QWidget):
         self._centralWidget = None
         self._result = None
         self._closable = True
+        self._closeAlignment = QtCore.Qt.AlignTop | QtCore.Qt.AlignRight
         self._closeButton = XToolButton(self)
         self._closeButton.setShadowed(True)
         self._closeButton.setIcon(QtGui.QIcon(resources.find('img/overlay/close.png')))
@@ -49,13 +50,32 @@ class XOverlayWidget(QtGui.QWidget):
         Adjusts the size of this widget as the parent resizes.
         """
         # adjust the close button
-        self._closeButton.move(self.width() - 38, 6)
+        align = self.closeAlignment()
+        if align & QtCore.Qt.AlignTop:
+            y = 6
+        else:
+            y = self.height() - 38
+
+        if align & QtCore.Qt.AlignLeft:
+            x = 6
+        else:
+            x = self.width() - 38
+
+        self._closeButton.move(x, y)
 
         # adjust the central widget
         widget = self.centralWidget()
         if widget is not None:
             center = self.rect().center()
             widget.move(center.x() - widget.width() / 2, center.y() - widget.height() / 2)
+
+    def closeAlignment(self):
+        """
+        Returns the alignment for the close button for this overlay widget.
+
+        :return <QtCore.Qt.Alignment>
+        """
+        return self._closeAlignment
 
     def centralWidget(self):
         """
@@ -158,6 +178,14 @@ class XOverlayWidget(QtGui.QWidget):
         else:
             self._closeButton.hide()
 
+    def setCloseAlignment(self, align):
+        """
+        Sets the alignment for the close button for this overlay widget.
+
+        :param      align | <QtCore.Qt.Alignment>
+        """
+        self._closeAlignment = align
+
     def setResult(self, result):
         """
         Sets the result for this overlay to the inputed value.
@@ -209,7 +237,7 @@ class XOverlayWidget(QtGui.QWidget):
             anim.start()
 
     @staticmethod
-    def modal(widget, parent=None):
+    def modal(widget, parent=None, align=QtCore.Qt.AlignTop | QtCore.Qt.AlignRight):
         """
         Creates a modal dialog for this overlay with the inputed widget.  If the user
         accepts the widget, then 1 will be returned, otherwise, 0 will be returned.
@@ -220,7 +248,9 @@ class XOverlayWidget(QtGui.QWidget):
             parent = QtGui.QApplication.instance().activeWindow()
 
         overlay = XOverlayWidget(parent)
+        overlay.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         overlay.setCentralWidget(widget)
+        overlay.setCloseAlignment(align)
         overlay.show()
         return overlay
 

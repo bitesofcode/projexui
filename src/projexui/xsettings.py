@@ -79,6 +79,9 @@ class XSettingsFormat(object):
         """
         raise NotImplementedError
 
+    def remove(self, key):
+        raise NotImplementedError
+
     def save(self, filename):
         """
         Saves the data for this settings format from the given filename.
@@ -192,6 +195,23 @@ class XmlFormat(XSettingsFormat):
                 return eval('{0}({1})'.format(typ, xelem.text))
             except:
                 return None
+
+    def remove(self, key):
+        curr = self._xstack[-1]
+        if key:
+            curr.clear()
+        else:
+            parts = nativestring(key).split('/')
+            for part in parts[:-1]:
+                next = curr.find(part)
+                if next is None:
+                    return
+                curr = next
+
+            try:
+                curr.remove(curr.find(parts[-1]))
+            except StandardError:
+                pass
 
     def save(self, filename):
         """
@@ -394,6 +414,13 @@ class YamlFormat(XSettingsFormat):
         if len(self._stack) > 1:
             self._stack.pop()
 
+    def remove(self, key):
+        curr = self._stack[-1]
+        if not key:
+            curr.clear()
+        else:
+            curr.pop(key, None)
+
     def setValue(self, key, value):
         """
         Sets the value for this settings key to the inputed value.
@@ -541,6 +568,12 @@ class XSettings(QtCore.QSettings):
             filename, ext = os.path.splitext(filename)
             filename += '.' + self._customFormat.extension()
         return filename
+
+    def remove(self, key):
+        if self._customFormat:
+            self._customFormat.remove(key)
+        else:
+            super(XSettings, self).remove(key)
 
     def setFileName(self, filename):
         """

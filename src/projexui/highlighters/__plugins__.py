@@ -1,3 +1,2 @@
-__recurse__ = False
-__toc__ = [r'projexui.highlighters.xcodehighlighter',
-r'projexui.highlighters.xpythonhighlighter']
+__toc__ = ['projexui.highlighters.xcodehighlighter',
+'projexui.highlighters.xpythonhighlighter']
