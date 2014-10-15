@@ -136,7 +136,15 @@ class XViewWidget(QtGui.QScrollArea):
         :return     <XViewPanel>  || None
         """
         focus_widget = QtGui.QApplication.instance().focusWidget()
-        return projexui.ancestor(focus_widget, XViewPanel)
+        focus_panel = projexui.ancestor(focus_widget, XViewPanel)
+
+        panels = self.panels()
+        if focus_panel in panels:
+            return focus_panel
+        try:
+            return panels[0]
+        except AttributeError:
+            return None
     
     def currentView(self):
         """
