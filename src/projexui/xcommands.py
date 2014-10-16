@@ -387,6 +387,7 @@ def loadUi(modulefile, inst, uifile=None, theme='default', className=None):
         module = None
         for modname in (modname_a, modname_b, modname_c, modname_d):
             modname = modname.strip('.')
+            logger.debug('Loading module: {0}...'.format(modname))
             try:
                 __import__(modname)
                 module = sys.modules[modname]
