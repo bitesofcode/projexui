@@ -26,7 +26,7 @@ __email__           = 'team@projexsoftware.com'
 __depends__ = ['projex', 'projex_xqt']
 __major__   = 3
 __minor__   = 0
-__revision__ = 1
+__revision__ = 2
 
 __version_info__   = (__major__, __minor__, __revision__)
 __version__        = '%s.%s' % (__major__, __minor__)
