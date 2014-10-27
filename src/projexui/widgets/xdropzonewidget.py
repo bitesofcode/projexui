@@ -109,7 +109,8 @@ class XDropZoneWidget(QtGui.QWidget):
         parent.installEventFilter(self)
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
         self.setLayout(QtGui.QGridLayout())
-        self.raise_()
+        self.lower()
+        self.hide()
 
     def addRegion(self, name, text, row, column):
         """
@@ -145,20 +146,27 @@ class XDropZoneWidget(QtGui.QWidget):
             self.resize(self.parent().width(), self.parent().height())
         
         elif event.type() == event.DragEnter:
-            self.raise_()
             if self._filter is None or self._filter(event):
+                self.raise_()
+                self.show()
+
                 for region in self.regions():
                     region.show()
         
         elif event.type() == event.DragMove:
-            self.raise_()
             if self._filter is None or self._filter(event):
+                self.raise_()
+                self.show()
+
                 pos = QtGui.QCursor.pos()
                 pos = self.mapFromGlobal(pos)
                 for region in self.regions():
                     region.testHovered(pos)
         
         elif event.type() in (event.DragLeave, event.Drop, event.Leave):
+            self.hide()
+            self.lower()
+
             for region in self.regions():
                 region.hide()
         
