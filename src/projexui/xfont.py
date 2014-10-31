@@ -21,7 +21,7 @@ class XFont(QtGui.QFont):
         
         # don't use the word wrap information
         if not wordWrap:
-            factor = rect.width() / float(metrics.width(text))
+            factor = rect.width() / max(float(metrics.width(text)), 1)
             if factor < 1:
                 new_size = self.pointSizeF() * factor
                 if new_size < minimum:

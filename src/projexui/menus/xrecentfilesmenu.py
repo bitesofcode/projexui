@@ -61,7 +61,7 @@ class XRecentFilesMenu(QMenu):
         :param      action | <QAction>
         """
         if not self.signalsBlocked():
-            filename = nativestring(action.data().toString())
+            filename = nativestring(unwrapVariant(action.data()))
             self.fileTriggered.emit(filename)
     
     def filenames( self ):

@@ -20,6 +20,7 @@ import datetime
 from projex.text import nativestring
 
 from projexui.qt import wrapVariant, unwrapVariant, Signal
+from xqt import QtCore
 from projexui.qt.QtCore           import  QObject, \
                                           QPointF, \
                                           QRectF, \
@@ -1095,7 +1096,8 @@ class XNode(QGraphicsRectItem):
         
         :return     <bool>
         """
-        return (self._xSnapToGrid and self._ySnapToGrid)
+        shift = QtCore.QCoreApplication.keyboardModifiers() == QtCore.Qt.ShiftModifier
+        return (self._xSnapToGrid and self._ySnapToGrid) or shift
     
     def isYLocked( self ):
         """
@@ -2161,7 +2163,7 @@ class XNode(QGraphicsRectItem):
                     connection  | <Connection>
         """
         dropzone = self.dropzoneAt(point)
-        if ( dropzone ):
+        if dropzone:
             dropzone.slot()(connection)
     
     def wordWrap(self):

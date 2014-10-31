@@ -120,6 +120,20 @@ class XOverlayWidget(QtGui.QWidget):
             self.setResult(0)
         return False
 
+    def exec_(self, autodelete=True):
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
+        if self.centralWidget():
+            QtCore.QTimer.singleShot(0, self.centralWidget().setFocus)
+
+        loop = QtCore.QEventLoop()
+        while self.isVisible() and not QtCore.QCoreApplication.closingDown():
+            loop.processEvents()
+
+        if autodelete:
+            self.deleteLater()
+
+        return self.result()
+
     def reject(self):
         """
         Rejects this overlay and exits the modal window.

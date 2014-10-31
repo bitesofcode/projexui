@@ -35,7 +35,6 @@ from projexui.qt.QtGui        import  QColor, \
 
 from projexui.xanimation                            import XObjectAnimation
 from projexui.widgets.xnodewidget.xnode             import XNode
-from projexui.widgets.xnodewidget.xnodepalette      import XNodePalette
 from projexui.widgets.xnodewidget.xnodeconnection   import XNodeConnection
 from projexui.widgets.xnodewidget.xnodelayer        import XNodeLayer
 from projexui.widgets.xnodewidget.xnodelayout       import XNodeLayout
