@@ -30,7 +30,7 @@ class XToolBar(QToolBar):
     collapseToggled = Signal(bool)
     
     def __init__(self, *args):
-        super(XToolBar, self).__init__( *args )
+        super(XToolBar, self).__init__(*args)
         
         # set custom properties
         self._collapseButton    = None
@@ -162,7 +162,8 @@ class XToolBar(QToolBar):
                 btn.setMaximumHeight(MAX_SIZE)
                 btn.setArrowType(Qt.RightArrow)
             else:
-                self.setMaximumWidth(1000)
+                self.setMaximumWidth(MAX_SIZE)
+                self._precollapseSize = None
                 btn.setMaximumHeight(12)
                 btn.setArrowType(Qt.LeftArrow)
                 

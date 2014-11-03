@@ -22,8 +22,8 @@ class XOverlayWidget(QtGui.QWidget):
 
         # create the coloring for the overlay
         palette = self.palette()
-        clr = QtGui.QColor('#333333')
-        clr.setAlpha(220)
+        clr = QtGui.QColor('#222222')
+        clr.setAlpha(210)
         palette.setColor(palette.Window, clr)
         self.setPalette(palette)
         self.setAutoFillBackground(True)
@@ -251,7 +251,7 @@ class XOverlayWidget(QtGui.QWidget):
             anim.start()
 
     @staticmethod
-    def modal(widget, parent=None, align=QtCore.Qt.AlignTop | QtCore.Qt.AlignRight):
+    def modal(widget, parent=None, align=QtCore.Qt.AlignTop | QtCore.Qt.AlignRight, blurred=True):
         """
         Creates a modal dialog for this overlay with the inputed widget.  If the user
         accepts the widget, then 1 will be returned, otherwise, 0 will be returned.

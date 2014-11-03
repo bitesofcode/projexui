@@ -241,7 +241,7 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         """
         return self._iconOverlays.get(column)
     
-    def initGroupStyle(self, useIcons=True):
+    def initGroupStyle(self, useIcons=True, columnCount=None):
         """
         Initialzes this item with a grouping style option.
         """
@@ -251,8 +251,8 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
             self.setFlags(flags)
         
         if useIcons:
-            ico        = QtGui.QIcon(resources.find('img/treeview/closed.png'))
-            expand_ico = QtGui.QIcon(resources.find('img/treeview/open.png'))
+            ico        = QtGui.QIcon(resources.find('img/treeview/triangle_right.png'))
+            expand_ico = QtGui.QIcon(resources.find('img/treeview/triangle_down.png'))
             
             self.setIcon(0, ico)
             self.setExpandedIcon(0, expand_ico)
@@ -285,12 +285,9 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         brush = QtGui.QBrush(gradient)
         
         tree = self.treeWidget()
-        if tree:
-            colcount = tree.columnCount()
-        else:
-            colcount = self.columnCount()
-        
-        for i in range(colcount):
+        columnCount = columnCount or (tree.columnCount() if tree else self.columnCount())
+
+        for i in range(columnCount):
             self.setForeground(i, text_clr)
             self.setBackground(i, brush)
     

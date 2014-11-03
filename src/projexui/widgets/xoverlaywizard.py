@@ -290,6 +290,11 @@ class XOverlayWizard(XOverlayWidget):
         self._buttons[self.WizardButton.CancelButton].clicked.connect(self.reject)
         self._buttons[self.WizardButton.RetryButton].clicked.connect(self.retry)
 
+    def accept(self):
+        if not self.currentPage() or self.currentPage().validatePage():
+            return super(XOverlayWizard, self).accept()
+        return False
+
     def addPage(self, page):
         """
         Adds a new overlay wizard page to this wizard.
@@ -316,11 +321,11 @@ class XOverlayWizard(XOverlayWidget):
 
         curr_page = self.currentPage()
         for page in self._pages.values():
+            page.resize(page_size.width(), page_size.height() - btn_height - 6)
             if page == curr_page:
                 page.move(x, y)
             else:
                 page.move(self.width(), y)
-            page.resize(page_size.width(), page_size.height() - btn_height - 6)
 
         # move the left most buttons
         y += page_size.height() - btn_height
