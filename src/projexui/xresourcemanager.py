@@ -157,6 +157,20 @@ class XResourceManager(object):
         """
         return self._defaults.get(key, default)
 
+    def exists(self, relpath, rsc=None, useFilepath=None):
+        """
+        Checks to see if the inputed path represents an existing file or directory.
+
+        :param      relpath     | <str>
+                    rsc         | <str>
+                    useFilepath | <bool> or None
+        """
+        path = self.find(relpath, rsc, useFilepath)
+        if path.startswith(':'):
+            return QtCore.QResource(path).isValid()
+        else:
+            return os.path.exists(path)
+
     def find(self, relpath, rsc=None, useFilepath=None):
         """
         Looks up the path for the resource based on the inputed relative path.
@@ -257,7 +271,7 @@ class XResourceManager(object):
         filepath = self.find(relpath, rsc)
         if filepath.startswith(':'):
             resource = QtCore.QResource(filepath)
-            return resource.isFile()
+            return resource.isFile() and resource.isValid()
         else:
             return os.path.isfile(filepath)
 
@@ -392,6 +406,7 @@ class XResourceManager(object):
         glbls['listdir'] = self.listdir
         glbls['load'] = self.load
         glbls['read'] = self.read
+        glbls['exists'] = self.exists
         glbls['setdefault'] = self.setDefault
         glbls['basePath'] = self.basePath
         glbls['setBasePath'] = self.setBasePath
