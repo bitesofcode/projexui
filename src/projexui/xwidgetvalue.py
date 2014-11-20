@@ -220,5 +220,5 @@ registerWidgetValue(XSerialEdit,
                     lambda w, v: w.setText(v))
 
 registerWidgetValue(XLocaleBox,
-                    lambda w: w.currentLocale(),
-                    lambda w, v: w.setCurrentLocale(v))
+                    lambda w: str(w.currentLocale()),
+                    lambda w, v: w.setBaseLocale(v))

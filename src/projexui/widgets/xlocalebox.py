@@ -20,7 +20,6 @@ __email__           = 'team@projexsoftware.com'
 import re
 import logging
 
-from projex.enum import enum
 from projex.lazymodule import LazyModule
 from projexui import resources
 from xqt import QtGui, QtCore, wrapVariant
@@ -150,7 +149,7 @@ class XLocaleBox(XComboBox):
         for i, locale in enumerate(locales):
             babel_locale = babel.Locale.parse(locale)
             code = '{0}_{1}'.format(babel_locale.language,
-                                        babel_locale.territory)
+                                    babel_locale.territory)
             keys = {}
             if self.isTranslated():
                 keys['lang'] = babel_locale.get_language_name(base)
@@ -165,7 +164,7 @@ class XLocaleBox(XComboBox):
                 opts = ''
                 if self.showScriptName() and keys['script']:
                     opts += keys['script']
-                if self.showTerritory():
+                if self.showTerritory() and keys['territory']:
                     if opts:
                         opts += ', '
                     opts += keys['territory']
@@ -245,11 +244,12 @@ class XLocaleBox(XComboBox):
             return
         
         try:
-            validate = babel.Locale.parse(locale)
+            babel.Locale.parse(locale)
         except (babel.UnknownLocaleError, StandardError):
             return False
         
         self._baseLocale = locale
+        self.setCurrentLocale(locale)
         self.setDirty()
         return True
 
@@ -262,7 +262,6 @@ class XLocaleBox(XComboBox):
         :return     <bool>
         """
         locale = str(locale)
-        
         for i in xrange(self.count()):
             if self.itemData(i) == locale:
                 self.setCurrentIndex(i)
