@@ -118,13 +118,6 @@ class XLocaleBox(XComboBox):
         :return     <bool>
         """
         self.setDirty(False)
-        
-        try:
-            base = babel.Locale.parse(self.baseLocale())
-        except ImportError:
-            log.error('babel is not installed.')
-            return False
-
         self.blockSignals(True)
         self.setUpdatesEnabled(False)
         self.clear()
@@ -189,7 +182,7 @@ class XLocaleBox(XComboBox):
                 flag = QtGui.QIcon(resources.find(ico))
             
             self.setItemIcon(i, flag)
-            if code == str(base):
+            if code == self.baseLocale():
                 index = i
         
         self.setCurrentIndex(index)
