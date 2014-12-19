@@ -19,6 +19,7 @@ class XOverlayWizardPage(QtGui.QFrame):
         self._commitPage = False
         self._finalPage = False
         self._retryEnabled = False
+        self._nextId = None
 
         # create the title information
         font = self.font()
@@ -125,6 +126,9 @@ class XOverlayWizardPage(QtGui.QFrame):
 
         :return     <int>
         """
+        if self._nextId is not None:
+            return self._nextId
+
         wizard = self.wizard()
         curr_id = wizard.currentId()
         all_ids = wizard.pageIds()
@@ -157,6 +161,15 @@ class XOverlayWizardPage(QtGui.QFrame):
         :param      state | <bool>
         """
         self._finalPage = state
+
+    def setNextId(self, pageId):
+        """
+        Sets the next page id that this page will point to.  If the id is None, then it will lookup the
+        id from the wizard.
+
+        :param      pageID | <int> || None
+        """
+        self._nextId = pageId
 
     def setSubTitle(self, title):
         """
