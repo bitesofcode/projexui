@@ -64,10 +64,10 @@ class XTimer(QtCore.QObject):
         self.__lock = QtCore.QReadWriteLock()
         
         # create connections
-        self._singleShotChanged.connect(self._setTimerSingleShot)
-        self._intervalChanged.connect(self._setTimerInterval)
-        self._startRequested.connect(self._startTimer)
-        self._stopRequested.connect(self._stopTimer)
+        self._singleShotChanged.connect(self._setTimerSingleShot, QtCore.Qt.QueuedConnection)
+        self._intervalChanged.connect(self._setTimerInterval, QtCore.Qt.QueuedConnection)
+        self._startRequested.connect(self._startTimer, QtCore.Qt.QueuedConnection)
+        self._stopRequested.connect(self._stopTimer, QtCore.Qt.QueuedConnection)
 
     def _setTimerInterval(self, interval):
         """
@@ -102,6 +102,9 @@ class XTimer(QtCore.QObject):
             self.__timer.setSingleShot(self.__singleShot)
             self.__timer.setInterval(interval)
             self.__timer.timeout.connect(self.timeout)
+
+            # ensure to stop this timer when the app quits
+            QtCore.QCoreApplication.instance().aboutToQuit.connect(self.__timer.stop, QtCore.Qt.QueuedConnection)
         
         self.__timer.start(interval)
 
