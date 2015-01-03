@@ -23,7 +23,7 @@ __email__           = 'team@projexsoftware.com'
 #------------------------------------------------------------------------------
 
 # define version information (major,minor,maintanence)
-__depends__ = ['projex', 'projex_xqt']
+__depends__ = ['projex', 'xqt']
 __major__   = 3
 __minor__   = 0
 __revision__ = 2
