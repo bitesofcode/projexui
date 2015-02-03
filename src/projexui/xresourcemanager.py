@@ -198,7 +198,9 @@ class XResourceManager(object):
         
         # return from the filesystem
         if useFilepath and rscpath:
-            if rsc:
+            if rsc and isinstance(rsc, XResourceManager):
+                return rsc.find(relpath, useFilepath=useFilepath)
+            elif rsc:
                 filepath = os.path.join(rscpath, rsc, relpath)
             else:
                 filepath = os.path.join(rscpath, relpath)
@@ -207,7 +209,9 @@ class XResourceManager(object):
                 return filepath
         
         # return resource
-        if rsc:
+        if isinstance(rsc, XResourceManager):
+            return rsc.find(relpath, useFilepath=useFilepath)
+        elif rsc:
             return ':{0}/{1}'.format(rsc, relpath.replace(os.path.sep, '/'))
         else:
             return ':{0}'.format(relpath.replace(os.path.sep, '/'))
@@ -432,9 +436,12 @@ class XResourceManager(object):
         Sets the default for a given key to the value.
         
         :param      key | <str>
-                    value | <str>
+                    value | <str> || <XResourceManager>
         """
-        self._defaults[key] = value
+        if value is None:
+            self._defaults.pop(key, None)
+        else:
+            self._defaults[key] = value
 
     def useFilepath(self):
         """
