@@ -102,10 +102,10 @@ class XResourceManager(object):
             rscpath = os.path.join(basepath, rsc)
             if os.path.isfile(rscpath):
                 continue
-            
-            opts = (projexui.qt.QT_WRAPPER.lower(), self.name(), rsc)
-            xml_file = os.path.join(basepath, '{1}_{2}.qrc'.format(*opts))
-            py_file = os.path.join(outpath, '{0}_{1}_{2}_rc.py'.format(*opts))
+
+            opts = (projexui.qt.QT_WRAPPER.lower(), rsc)
+            xml_file = os.path.join(basepath, '{1}.qrc'.format(*opts))
+            py_file = os.path.join(outpath, '{0}_{1}_rc.py'.format(*opts))
             
             # determine the update for the build system
             if os.path.exists(py_file):
