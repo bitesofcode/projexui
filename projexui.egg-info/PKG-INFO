@@ -1,10 +1,10 @@
 Metadata-Version: 1.0
 Name: projexui
 Version: 3.0
-Summary: UNKNOWN
-Home-page: http://www.projexsoftware.com
-Author: Projex Software
-Author-email: team@projexsoftware.com
+Summary: Library of Qt extension widgets.
+Home-page: https://github.com/ProjexSoftware/projexui
+Author: Eric Hulser
+Author-email: eric.hulser@gmail.com
 License: LGPL
-Description:  Provides a library of reusable user interface components. 
+Description: Library of Qt extension widgets.
 Platform: UNKNOWN

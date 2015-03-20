@@ -62,3 +62,6 @@
 /src/projexui/windows/xdkwindow/ui/xdkwindow_pyside_ui.py
 /src/projexui/wizards/xscaffoldwizard/ui/__init__.py
 /src/projexui/wizards/xscaffoldwizard/ui/xscaffoldstructurepage_pyside_ui.py
+projexui/resources/rc/pyside_apps_rc.py
+projexui/resources/rc/pyside_default_rc.py
+projexui/resources/rc/pyside_styles_rc.py

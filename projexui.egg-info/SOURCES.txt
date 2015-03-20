@@ -1,4 +1,6 @@
+LICENSE.md
 MANIFEST.in
+README.md
 setup.py
 projexui/__init__.py
 projexui/pyi_hook.py
