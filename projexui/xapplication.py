@@ -45,7 +45,8 @@ class XApplication(QtGui.QApplication):
         self.addLibraryPath(plugpath)
         
         # set default value
-        projexui.stylize(self)
+        if sys.platform != 'darwin':
+            projexui.stylize(self)
         
         self.setQuitOnLastWindowClosed(True)
 
