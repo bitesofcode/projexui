@@ -26,14 +26,11 @@ __email__           = 'team@projexsoftware.com'
 __depends__ = ['projex', 'xqt']
 __major__   = 3
 __minor__   = 0
-__revision__ = 3
+__revision__ = 4
 
 __version_info__   = (__major__, __minor__, __revision__)
-__version__        = '%s.%s' % (__major__, __minor__)
+__version__        = '{0}.{1}.{2}'.format(*__version_info__)
 
-#------------------------------------------------------------------------------
-
-import sys
 
 from projexui.xcommands     import *
 from projexui.xwidgetvalue  import *
