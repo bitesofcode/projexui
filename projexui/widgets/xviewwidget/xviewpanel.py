@@ -21,13 +21,14 @@ from projexui.widgets.xviewwidget.xview import XView
 from projexui.widgets.xsplitter import XSplitter
 from projexui.widgets.xtoolbutton import XToolButton
 from projexui.widgets.xlabel import XLabel
-from projexui.widgets.xlabel import XLabel
 from xqt import QtCore, QtGui
 
 MAX_INT = 2**16
 log = logging.getLogger(__name__)
 
 class XViewPanelItem(QtGui.QWidget):
+    titleChanged = QtCore.Signal(str)
+
     def __init__(self, title, parent=None):
         super(XViewPanelItem, self).__init__(parent)
 
@@ -82,6 +83,7 @@ class XViewPanelItem(QtGui.QWidget):
         self.setLayout(layout)
 
         # create connections
+        self._titleLabel.editingFinished.connect(self.titleChanged)
         self._closeButton.clicked.connect(self.closeTab)
         self._searchButton.clicked.connect(self.showTabMenu)
 
@@ -400,6 +402,7 @@ class XViewPanelBar(QtGui.QWidget):
         self.layout().insertWidget(index, tab)
 
         self.setCurrentIndex(index)
+        return tab
 
     def clear(self):
         """
@@ -477,6 +480,7 @@ class XViewPanelBar(QtGui.QWidget):
         # remove it from the layout first
         self.layout().insertWidget(index, tab)
         self.setCurrentIndex(index)
+        return tab
 
     def isLocked(self):
         return self._locked
@@ -840,8 +844,9 @@ class XViewPanel(QtGui.QStackedWidget):
         if not isinstance(view, XView):
             return False
 
-        self._tabBar.addTab(title)
+        tab = self._tabBar.addTab(title)
         self.addWidget(view)
+        tab.titleChanged.connect(view.setWindowTitle)
         
         # create connections
         try:
@@ -1194,7 +1199,8 @@ class XViewPanel(QtGui.QStackedWidget):
                     title  | <str>
         """
         self.insertWidget(index, widget)
-        self.tabBar().insertTab(index, title)
+        tab = self.tabBar().insertTab(index, title)
+        tab.titleChanged.connect(widget.setWindowTitle)
 
     def insertView(self, index, viewType):
         if not viewType:
