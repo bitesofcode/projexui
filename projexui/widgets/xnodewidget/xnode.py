@@ -1084,8 +1084,8 @@ class XNode(QGraphicsRectItem):
         :return     <bool>
         """
         # return if the layer is not the current layer
-        if ( self._layer and not self._layer.isCurrent() ):
-            return True
+        if self._layer and not self._layer.isCurrent():
+             return True
         
         # return whether or not the node is enabld or locked
         return not self._enabled or (self._xLocked and self._yLocked)

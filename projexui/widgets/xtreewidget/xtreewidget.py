@@ -301,7 +301,7 @@ class XTreeWidget(QtGui.QTreeWidget):
                         break
                 
                 # if this item is not found, then check all children
-                if not mfound:
+                if not mfound and (autoExpand or item.isExpanded()):
                     mfound = self.__filterItems(terms,
                                                 autoExpand, 
                                                 caseSensitive,

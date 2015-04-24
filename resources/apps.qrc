@@ -1,5 +1,5 @@
 <RCC>
   <qresource prefix="apps">
-    <file alias="xdk.ico">apps/xdk.ico</file>
+    <file alias="xdk.ico">apps\xdk.ico</file>
   </qresource>
 </RCC>
