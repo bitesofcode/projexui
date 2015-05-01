@@ -489,10 +489,10 @@ class XSettings(QtCore.QSettings):
         super(XSettings, self).__init__(*args)
         
         self._filename = kwds.get('filename', '')
-        
-        # load the custom format
-        if self._customFormat and os.path.exists(self.fileName()):
-            self._customFormat.load(self.fileName())
+
+        # try to autoload the settings for a custom format
+        if kwds.get('autoLoad', True):
+            self.load()
 
     def allKeys(self):
         """
@@ -553,6 +553,14 @@ class XSettings(QtCore.QSettings):
             self._customFormat.endGroup()
         else:
             super(XSettings, self).endGroup()
+
+    def load(self):
+        """
+        Loads the settings from disk for this XSettings object, if it is a custom format.
+        """
+        # load the custom format
+        if self._customFormat and os.path.exists(self.fileName()):
+            self._customFormat.load(self.fileName())
 
     def fileName(self):
         """
