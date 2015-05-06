@@ -66,3 +66,5 @@ projexui/resources/rc/pyside_apps_rc.py
 projexui/resources/rc/pyside_default_rc.py
 projexui/resources/rc/pyside_styles_rc.py
 /dist
+build
+projexui.egg-info

@@ -92,7 +92,7 @@ def buildResourceFile(rscpath, outpath=''):
         outpath = os.path.join(outpath, filename)
     
     # try to use Qt first, because it is so much better
-    PYQT_RCC_EXE = os.environ.get('PYQT_RCC_EXE', 'pyrcc4.exe')
+    PYQT_RCC_EXE = os.environ.get('PYQT_RCC_EXE', 'pyrcc4')
     try:
         subprocess.call([PYQT_RCC_EXE, '-o', outpath, rscpath])
         used_pyqt = True
@@ -217,10 +217,9 @@ def generateResourceFile(srcpath, outpath='', buildpath='', build=True):
     xml_str = ElementTree.tostring(xml)
     
     # save the exported information
-    f = open(outpath, 'w')
-    f.write(xml_str)
-    f.close()
-    
+    with open(outpath, 'w') as f:
+        f.write(xml_str)
+
     if build:
         buildResourceFile(outpath, buildpath)
 
