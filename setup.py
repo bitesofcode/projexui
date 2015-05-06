@@ -1,9 +1,8 @@
-import projexui
 from setuptools import setup, find_packages
 
 setup(
     name = 'projexui',
-    version = projexui.__version__,
+    version = '3.0.5',
     author = 'Eric Hulser',
     author_email = 'eric.hulser@gmail.com',
     maintainer = 'Eric Hulser',
