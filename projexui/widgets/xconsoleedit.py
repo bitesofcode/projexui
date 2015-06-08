@@ -342,7 +342,7 @@ class XConsoleEdit(XLoggerWidget):
             self.acceptCompletion()
             return False
         
-        elif event.key() in (Qt.Key_Up, Qt.Key_Down):
+        elif event.key() in (Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown):
             return False
         
         else:
