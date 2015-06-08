@@ -87,8 +87,6 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         
         tree = self.treeWidget()
         if tree:
-            tree.destroyed.connect(self.destroy)
-            
             try:
                 height = tree.defaultItemHeight()
             except StandardError:
@@ -133,8 +131,8 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         since QTreeWidgetItem's are not QObjects', they do not properly handle
         being destroyed with connections on them.
         """
-        tree = self.treeWidget()
         try:
+            tree = self.treeWidget()
             tree.destroyed.disconnect(self.destroy)
         except StandardError:
             pass
@@ -317,7 +315,20 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         :return     <QtGui.QMovie> || None
         """
         return self._movies.get(column)
-    
+
+    def requireCleanup(self):
+        """
+        If you intend to use any signal/slot connections on this QTreeWidgetItem, you will need
+        to call the requireCleanup method and implement manual disconnections in the destroy method.
+
+        QTreeWidgetItem's do not inherit from QObject, and as such do not utilize the memory cleanup
+        associated with QObject connections.
+        """
+        try:
+            tree.destroyed.connect(self.destroy, QtCore.Qt.UniqueConnection)
+        except StandardError:
+            pass
+
     def setColumnEditingEnabled(self, column, state=True):
         """
         Sets whether or not the given column for this item should be editable.
@@ -475,6 +486,8 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
                 pass
         
         if movie is not None:
+            self.requireCleanup()
+
             self._movies[column] = movie
             self.setIcon(column, QtGui.QIcon(movie.currentPixmap()))
             
@@ -553,5 +566,3 @@ class XTreeWidgetItem(QtGui.QTreeWidgetItem):
         :return     <bool>
         """
         return bool(self.flags() & flags)
-
-
