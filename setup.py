@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'projexui',
-    version = '3.0.5',
+    version = '3.0.6',
     author = 'Eric Hulser',
     author_email = 'eric.hulser@gmail.com',
     maintainer = 'Eric Hulser',
