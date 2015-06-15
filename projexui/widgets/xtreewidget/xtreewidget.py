@@ -2122,8 +2122,12 @@ class XTreeWidget(QtGui.QTreeWidget):
         
         :return     [<QtGui.QTreeWidgetItem>, ..]
         """
-        for i in xrange(self.topLevelItemCount()):
-            yield self.topLevelItem(i)
+        try:
+            for i in xrange(self.topLevelItemCount()):
+                yield self.topLevelItem(i)
+        except RuntimeError:
+            # can be raised when iterating on a deleted tree widget.
+            return
     
     def traverseItems(self,
                       mode=TraverseMode.DepthFirst,
@@ -2137,28 +2141,35 @@ class XTreeWidget(QtGui.QTreeWidget):
         
         :return     <generator>
         """
-        if parent:
-            count = parent.childCount()
-            func = parent.child
-        else:
-            count = self.topLevelItemCount()
-            func = self.topLevelItem
+        try:
+            if parent:
+                count = parent.childCount()
+                func = parent.child
+            else:
+                count = self.topLevelItemCount()
+                func = self.topLevelItem
+        except RuntimeError:
+            # can be raised when iterating on a deleted tree widget.
+            return
         
         next = []
         for i in range(count):
-            item = func(i)
-            
-            yield item
-            if mode == XTreeWidget.TraverseMode.DepthFirst:
-                for child in self.traverseItems(mode, item):
-                    yield child
+            try:
+                item = func(i)
+            except RuntimeError:
+                # can be raised when iterating on a deleted tree widget
+                return
             else:
-                next.append(item)
+                yield item
+                if mode == XTreeWidget.TraverseMode.DepthFirst:
+                    for child in self.traverseItems(mode, item):
+                        yield child
+                else:
+                    next.append(item)
         
         for item in next:
             for child in self.traverseItems(mode, item):
                 yield child
-
 
     def useDragPixmaps( self ):
         """
