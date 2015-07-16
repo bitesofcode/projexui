@@ -1123,25 +1123,31 @@ class XViewPanel(QtGui.QStackedWidget):
         Find and switch to the first tab of the specified view type. If the
         type does not exist, add it.
 
-        :param     viewType |
+        :param     viewType | <subclass of XView>
+
+        :return    <XView> || None
         """
         # make sure we're not trying to switch to the same type
         view = self.currentView()
         if type(view) == viewType:
-            return
+            return view
 
         self.blockSignals(True)
         self.setUpdatesEnabled(False)
 
         for i in xrange(self.count()):
-            if type(self.widget(i)) == viewType:
+            widget = self.widget(i)
+            if type(widget) == viewType:
                 self.setCurrentIndex(i)
+                view = widget
                 break
         else:
-            self.addView(viewType)
+            view = self.addView(viewType)
 
         self.blockSignals(False)
         self.setUpdatesEnabled(True)
+
+        return view
 
     def eventFilter(self, object, event):
         if event.type() == event.MouseButtonPress:
@@ -1499,15 +1505,16 @@ class XViewPanel(QtGui.QStackedWidget):
         Swaps the current tab view for the inputed action's type.
 
         :param      action | <QAction>
+
+        :return     <XView> || None
         """
         if not self.count():
-            self.addView(viewType)
-            return
+            return self.addView(viewType)
 
         # make sure we're not trying to switch to the same type
         view = self.currentView()
         if type(view) == viewType:
-            return
+            return view
 
         # create a new view and close the old one
         self.blockSignals(True)
@@ -1516,7 +1523,7 @@ class XViewPanel(QtGui.QStackedWidget):
         # create the new view
         index = self.indexOf(view)
         if not view.close():
-            return False
+            return None
         #else:
         #    self.tabBar().removeTab(index)
 
@@ -1529,6 +1536,8 @@ class XViewPanel(QtGui.QStackedWidget):
         self.blockSignals(False)
         self.setUpdatesEnabled(True)
         self.setCurrentIndex(index)
+
+        return new_view
     
     def showEvent(self, event):
         super(XViewPanel, self).showEvent(event)
