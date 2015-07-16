@@ -587,6 +587,7 @@ class XViewPanelBar(QtGui.QWidget):
 
         for i, item in enumerate(self.items()):
             item.setMenuEnabled(i == index)
+        self.repaint()
 
     def setCurrentItem(self, item):
         """
@@ -1116,7 +1117,32 @@ class XViewPanel(QtGui.QStackedWidget):
             elif area == 'bottom':
                 panel = self.addPanel(QtCore.Qt.Vertical)
                 panel.addTab(view, view.windowTitle())
-    
+
+    def ensureVisible(self, viewType):
+        """
+        Find and switch to the first tab of the specified view type. If the
+        type does not exist, add it.
+
+        :param     viewType |
+        """
+        # make sure we're not trying to switch to the same type
+        view = self.currentView()
+        if type(view) == viewType:
+            return
+
+        self.blockSignals(True)
+        self.setUpdatesEnabled(False)
+
+        for i in xrange(self.count()):
+            if type(self.widget(i)) == viewType:
+                self.setCurrentIndex(i)
+                break
+        else:
+            self.addView(viewType)
+
+        self.blockSignals(False)
+        self.setUpdatesEnabled(True)
+
     def eventFilter(self, object, event):
         if event.type() == event.MouseButtonPress:
             if self.isLocked():
@@ -1416,7 +1442,16 @@ class XViewPanel(QtGui.QStackedWidget):
         
     def splitHorizontal(self, count=2, before=False, autoCreateView=True):
         self.split(QtCore.Qt.Horizontal, count, before, autoCreateView)
-    
+
+    def setCurrentIndex(self, index):
+        """
+        Sets the current index on self and on the tab bar to keep the two insync.
+
+        :param     index | <int>
+        """
+        super(XViewPanel, self).setCurrentIndex(index)
+        self.tabBar().setCurrentIndex(index)
+
     def setHideTabsWhenLocked(self, state):
         """
         Sets whether or not tabs should be visible when the profile is locked
