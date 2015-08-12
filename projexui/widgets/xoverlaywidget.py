@@ -139,8 +139,8 @@ class XOverlayWidget(QtGui.QWidget):
         Rejects this overlay and exits the modal window.
         """
         self.close()
-        self.setResult(1)
-        self.finished.emit(1)
+        self.setResult(0)
+        self.finished.emit(0)
 
     def result(self):
         """
