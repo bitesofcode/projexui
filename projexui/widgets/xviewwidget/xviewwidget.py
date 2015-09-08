@@ -143,7 +143,7 @@ class XViewWidget(QtGui.QScrollArea):
             return focus_panel
         try:
             return panels[0]
-        except AttributeError:
+        except IndexError:
             return None
     
     def currentView(self):
