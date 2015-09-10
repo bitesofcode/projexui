@@ -13,7 +13,7 @@ __email__           = 'team@projexsoftware.com'
 
 #------------------------------------------------------------------------------
 
-from projexui.qt.QtGui import QDialog
+from projexui.qt.QtGui import QDialog, QMessageBox
 
 import projexui
 from projex.text import nativestring
