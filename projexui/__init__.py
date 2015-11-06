@@ -39,5 +39,5 @@ from projexui.xcommands     import *
 from projexui.xwidgetvalue  import *
 from projexui.xdatatype     import *
 
-DESIGNER_MODE = 'designer.exe' in sys.executable
+DESIGNER_MODE = os.environ.get('DESIGNER_MODE', str('designer.exe' in sys.executable)) == 'True'
 
