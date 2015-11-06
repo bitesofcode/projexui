@@ -266,7 +266,7 @@ class XViewWidget(QtGui.QScrollArea):
         
         :return     [<XViewPanel>, ..]
         """
-        return self.findChildren(XViewPanel)
+        return [panel for panel in self.findChildren(XViewPanel) if panel.viewWidget() == self]
     
     def registerViewType(self, cls, window=None):
         """
