@@ -91,7 +91,6 @@ class XResourceManager(object):
         :param      force | <bool>
         """
         basepath = self.resourcePath()
-        
         if basepath is None:
             return
         

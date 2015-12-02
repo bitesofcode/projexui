@@ -69,6 +69,9 @@ class XTimer(QtCore.QObject):
         self._startRequested.connect(self._startTimer, QtCore.Qt.QueuedConnection)
         self._stopRequested.connect(self._stopTimer, QtCore.Qt.QueuedConnection)
 
+    def _clearTimer(self):
+        self.__timer = None
+
     def _setTimerInterval(self, interval):
         """
         Sets the internal timer's interval.
@@ -102,6 +105,7 @@ class XTimer(QtCore.QObject):
             self.__timer.setSingleShot(self.__singleShot)
             self.__timer.setInterval(interval)
             self.__timer.timeout.connect(self.timeout)
+            self.__timer.destroyed.connect(self._clearTimer)
 
             # ensure to stop this timer when the app quits
             QtCore.QCoreApplication.instance().aboutToQuit.connect(self.__timer.stop, QtCore.Qt.QueuedConnection)
