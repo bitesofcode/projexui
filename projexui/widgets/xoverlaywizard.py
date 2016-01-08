@@ -823,13 +823,14 @@ class XOverlayWizard(XOverlayWidget):
         """
         page.setParent(self)
 
-        # create the drop shadow effect
-        effect = QtGui.QGraphicsDropShadowEffect(page)
-        effect.setColor(QtGui.QColor('black'))
-        effect.setBlurRadius(50)
-        effect.setOffset(0, 0)
+        if self.property("useShadow") is not False:
+            # create the drop shadow effect
+            effect = QtGui.QGraphicsDropShadowEffect(page)
+            effect.setColor(QtGui.QColor('black'))
+            effect.setBlurRadius(50)
+            effect.setOffset(0, 0)
 
-        page.setGraphicsEffect(effect)
+            page.setGraphicsEffect(effect)
 
         self._pages[pageId] = page
         if self._startId == -1:
