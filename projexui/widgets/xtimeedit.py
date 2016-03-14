@@ -223,28 +223,30 @@ class XTimeEdit(QtGui.QWidget):
 
         :return     <QtCore.QTime>
         """
+        if self.isMilitaryTime():
+            format = 'hh:mm:ss'
+            time_of_day = ''
+        else:
+            format = 'hh:mm:ssap'
+            time_of_day = self._timeOfDayCombo.currentText().lower()
+
         try:
-            hour = int(self._hourCombo.currentText())
+            hour = int(self._hourCombo.currentText()) if self.showHours() else 1
         except ValueError:
             hour = 1
 
         try:
-            minute = int(self._minuteCombo.currentText())
+            minute = int(self._minuteCombo.currentText()) if self.showMinutes() else 0
         except ValueError:
             minute = 0
 
         try:
-            second = int(self._secondCombo.currentText())
+            second = int(self._secondCombo.currentText()) if self.showSeconds() else 0
         except ValueError:
             second = 0
 
-        if not self.isMilitaryTime():
-            if self._timeOfDayCombo.currentText() == 'pm':
-                hour += 12
-
-        return QtCore.QTime(hour if self.showHours() else 1,
-                            minute if self.showMinutes() else 0,
-                            second if self.showSeconds() else 0)
+        combined = '{0:02}:{1:02}:{2:02}{3}'.format(hour, minute, second, time_of_day)
+        return QtCore.QTime.fromString(combined, format)
 
     x_time = QtCore.Property(QtCore.QTime, time, setTime)
     x_militaryTime = QtCore.Property(bool, isMilitaryTime, setMilitaryTime)
