@@ -384,6 +384,7 @@ class XLogRecordWidget(QtGui.QWidget):
         """
         if level == logging.NOTSET:
             self.removeLogger(logger)
+            self.handler().setLoggerLevel(logger, level)
             return
             
         if isinstance(logger, logging.Logger):
